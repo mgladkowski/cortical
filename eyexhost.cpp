@@ -162,6 +162,64 @@ void EyeXHost::HandleQuery(TX_CONSTHANDLE hAsyncData) {
 
     TX_HANDLE hQuery(TX_EMPTY_HANDLE);
     txGetAsyncDataContent(hAsyncData, &hQuery);
+
+    const int bufferSize = 20;
+    TX_CHAR windowId[bufferSize];
+    TX_CHAR regionId[bufferSize];
+
+    // read the query bounds from the query, the area on the screen that the query concerns
+
+    TX_HANDLE hBounds(TX_EMPTY_HANDLE);
+    txGetQueryBounds(hQuery, &hBounds);
+    TX_REAL pX, pY, pWidth, pHeight;
+    txGetRectangularBoundsData(hBounds, &pX, &pY, &pWidth, &pHeight);
+    txReleaseObject(&hBounds);
+    Gdiplus::Rect queryBounds((INT)pX, (INT)pY, (INT)pWidth, (INT)pHeight);
+
+    // create a new snapshot with the same window id and bounds as the query
+
+    TX_HANDLE hSnapshot(TX_EMPTY_HANDLE);
+    txCreateSnapshotForQuery(hQuery, &hSnapshot);
+
+    sprintf(windowId, "%d", reinterpret_cast<std::uintptr_t>(_hWnd));
+
+    if (QueryIsForWindowId(hQuery, windowId)) {
+
+        // define options for our activatable regions: no, we don't want tentative focus events
+
+        TX_ACTIVATABLEPARAMS params = { TX_FALSE };
+
+        // iterate through all regions and create interactors for those that overlap with the query bounds
+
+        for (auto region : _regions) {
+
+            Gdiplus::Rect regionBounds(
+                        (INT)region.bounds.left,
+                        (INT)region.bounds.top,
+                        (INT)(region.bounds.right - region.bounds.left),
+                        (INT)(region.bounds.bottom - region.bounds.top));
+
+            if (queryBounds.IntersectsWith(regionBounds)) {
+
+                TX_HANDLE hInteractor(TX_EMPTY_HANDLE);
+
+                sprintf(regionId, "%d", region.id);
+
+                TX_RECT bounds;
+                bounds.X = region.bounds.left;
+                bounds.Y = region.bounds.top;
+                bounds.Width = region.bounds.right - region.bounds.left;
+                bounds.Height = region.bounds.bottom - region.bounds.top;
+
+                txCreateRectangularInteractor(hSnapshot, &hInteractor, regionId, &bounds, TX_LITERAL_ROOTID, windowId);
+                txCreateActivatableBehavior(hInteractor, &params);
+                txReleaseObject(&hInteractor);
+            }
+        }
+    }
+
+    txCommitSnapshotAsync(hSnapshot, OnSnapshotCommitted, nullptr);
+    txReleaseObject(&hSnapshot);
     txReleaseObject(&hQuery);
 }
 
@@ -195,6 +253,26 @@ void TX_CALLCONVENTION EyeXHost::OnSnapshotCommitted(TX_CONSTHANDLE hAsyncData, 
 }
 
 
+bool EyeXHost::QueryIsForWindowId(TX_HANDLE hQuery, const TX_CHAR* windowId) {
+
+    const int bufferSize = 20;
+    TX_CHAR buffer[bufferSize];
+    TX_SIZE count;
+
+    if (TX_RESULT_OK == txGetQueryWindowIdCount(hQuery, &count)) {
+
+        for (int i = 0; i < count; i++) {
+
+            TX_SIZE size = bufferSize;
+            if (TX_RESULT_OK == txGetQueryWindowId(hQuery, i, buffer, &size)) {
+                if (0 == strcmp(windowId, buffer)) return true;
+            }
+        }
+    }
+    return false;
+}
+
+
 void EyeXHost::SetState(State state) {
 
     if (_state != state) {
@@ -204,9 +282,9 @@ void EyeXHost::SetState(State state) {
 }
 
 
-void EyeXHost::SetActivatableRegions(const QVector<ActivatableRegion> &regions) {
+void EyeXHost::SetActivatableRegions(const std::vector<ActivatableRegion> & regions) {
 
-    qCopy(regions.begin(), regions.end(), _regions.begin());
+    _regions.assign(regions.begin(), regions.end());
 }
 
 

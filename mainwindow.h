@@ -5,10 +5,12 @@
 #include <QDebug>
 #include <QDesktopWidget>
 #include <QHotkey>
-#include <QPainter>
+#include <QPushButton>
+#include <QSize>
 #include <windows.h>
-#include <wingdi.h>
 #include "eyexhost.h"
+
+#define IDC_ACTIVATOR_BUTTON    101
 
 namespace Ui {
 class MainWindow;
@@ -33,6 +35,8 @@ private:
 
     Ui::MainWindow *ui;
 
+    RECT    GetScreenBounds(QPushButton * button);
+    void    UpdateActivatableRegions();
 
 public slots:
 

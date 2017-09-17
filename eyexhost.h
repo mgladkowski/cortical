@@ -6,9 +6,14 @@
 #include <QObject>
 #include <QVector>
 #include <QCursor>
-#include <assert.h>
 #include <windows.h>
+#include <objidl.h>
+#include <gdiplus.h>
+#include <cassert>
+#include <cstdint>
 #include "eyex/EyeX.h"
+
+#define WINDOW_HANDLE_FORMAT "%d"
 
 
 struct ActivatableRegion {
@@ -55,7 +60,7 @@ public:
 
     bool IsFunctional();
 
-    void SetActivatableRegions(const QVector<ActivatableRegion> &regions);
+    void SetActivatableRegions(const std::vector<ActivatableRegion> & regions);
 
     void TriggerActivation();
 
@@ -70,7 +75,7 @@ private:
     TX_STRING           _gazeInteractorId;
     TX_HANDLE           _gazeInteractorSnapshot;
     State               _state;
-    QVector<ActivatableRegion> _regions;
+    std::vector<ActivatableRegion> _regions;
 
     bool InitializeGlobalInteractorSnapshot();
     bool RegisterConnectionStateChangedHandler();
@@ -78,12 +83,14 @@ private:
     bool RegisterEventHandler();
 
     void OnEngineConnectionStateChanged(TX_CONNECTIONSTATE connectionState);
+    void SetState(State state);
+
     void HandleQuery(TX_CONSTHANDLE hAsyncData);
     void HandleEvent(TX_CONSTHANDLE hAsyncData);
 
     static void TX_CALLCONVENTION OnSnapshotCommitted(TX_CONSTHANDLE hAsyncData, TX_USERPARAM param);
 
-    void SetState(State state);
+    static bool QueryIsForWindowId(TX_HANDLE hQuery, const TX_CHAR* windowId);
 
 
 signals:

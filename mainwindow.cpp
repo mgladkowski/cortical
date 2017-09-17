@@ -28,12 +28,50 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     // initialize HID
 
     eyes.Init( (HWND)this->winId() );
+
+    UpdateActivatableRegions();
+
 }
 
 
 MainWindow::~MainWindow() {
 
     delete ui;
+}
+
+
+/* Gets the bounds of a button in screen coordinates
+ *
+ */
+RECT MainWindow::GetScreenBounds(QPushButton * button) {
+
+    HWND hButton = (HWND)button->winId();
+    QSize size = button->size();
+    POINT point = { 0, 0 };
+    ClientToScreen(hButton, &point);
+
+    RECT bounds;
+    bounds.left = point.x;
+    bounds.top = point.y;
+    bounds.right = bounds.left + size.width();
+    bounds.bottom = bounds.top + size.height();
+
+    //qDebug() << bounds.left << " " << bounds.top << " " << bounds.right << " " << bounds.bottom;
+
+    return bounds;
+}
+
+
+/* Reports the buttons as activatable regions to the EyeX host
+ *
+ */
+void MainWindow::UpdateActivatableRegions() {
+
+    std::vector<ActivatableRegion> regions;
+
+    regions.push_back(ActivatableRegion(IDC_ACTIVATOR_BUTTON, GetScreenBounds(ui->buttonMain)));
+
+    eyes.SetActivatableRegions(regions);
 }
 
 

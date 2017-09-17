@@ -14,6 +14,7 @@ QMAKE_CXXFLAGS_WARN_ON += -Wno-reorder
 QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-variable
 QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter
 QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-but-set-variable
+QMAKE_CXXFLAGS_WARN_ON += -Wno-missing-field-initializers
 
 TARGET = Cortical
 
@@ -21,6 +22,7 @@ TEMPLATE = app
 
 LIBS += D:/Qt/projects/Cortical/lib/Tobii.EyeX.Client.lib
 LIBS += D:/Qt/projects/Cortical/lib/gdi32.lib
+LIBS += D:/Qt/projects/Cortical/lib/gdiplus.lib
 
 include(qhotkey.pri)
 
