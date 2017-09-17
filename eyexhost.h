@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <QObject>
 #include <QVector>
+#include <QCursor>
 #include <assert.h>
 #include <windows.h>
 #include "eyex/EyeX.h"
@@ -12,8 +13,8 @@
 
 struct ActivatableRegion {
 
-    int id;
-    RECT bounds;
+    int     id;
+    RECT    bounds;
     ActivatableRegion(){}
     ActivatableRegion(int paramId, RECT paramBounds) : id(paramId), bounds(paramBounds){}
 };
@@ -29,14 +30,26 @@ public:
     explicit EyeXHost(QObject *parent = nullptr);
     ~EyeXHost();
 
-
     enum State {
-
-        Initializing,
-        Connected,
-        Disconnected,
-        Failed
+            Initializing,
+            Connected,
+            Disconnected,
+            Failed
     };
+
+    enum Mouse {
+            Off,
+            Gaze,
+            Control
+    };
+
+    Mouse   mouse;
+    int     gazeX;
+    int     gazeY;
+    int     emaX;
+    int     emaY;
+    int     ema_size;
+    float   ema_multiplier;
 
     void Init(HWND hWnd);
 
@@ -49,14 +62,14 @@ public:
 
 private:
 
-    HWND        _hWnd;
-    TX_CONTEXTHANDLE _context;
-    TX_TICKET   _connectionStateChangedTicket;
-    TX_TICKET   _queryHandlerTicket;
-    TX_TICKET   _eventHandlerTicket;
-    TX_STRING   _gazeInteractorId;
-    TX_HANDLE   _gazeInteractorSnapshot;
-    State       _state;
+    HWND                _hWnd;
+    TX_CONTEXTHANDLE    _context;
+    TX_TICKET           _connectionStateChangedTicket;
+    TX_TICKET           _queryHandlerTicket;
+    TX_TICKET           _eventHandlerTicket;
+    TX_STRING           _gazeInteractorId;
+    TX_HANDLE           _gazeInteractorSnapshot;
+    State               _state;
     QVector<ActivatableRegion> _regions;
 
     bool InitializeGlobalInteractorSnapshot();
@@ -76,10 +89,13 @@ private:
 signals:
 
     void ConnectionStateChanged();
+
     void GazeEvent(int X, int Y);
 
 
 public slots:
+
+    void on_GazeEvent(int X, int Y);
 
 };
 

@@ -4,7 +4,10 @@
 #include <QMainWindow>
 #include <QDebug>
 #include <QDesktopWidget>
+#include <QHotkey>
+#include <QPainter>
 #include <windows.h>
+#include <wingdi.h>
 #include "eyexhost.h"
 
 namespace Ui {
@@ -23,23 +26,18 @@ public:
 
     EyeXHost eyes;
 
+    void    on_hotkey_pressed();
+
+
 private:
 
     Ui::MainWindow *ui;
 
-    bool    eyeMouse;
-    int     gazeX;
-    int     gazeY;
-    int     emaX;
-    int     emaY;
-    int     ema_size;
-    float   ema_multiplier;
-
 
 public slots:
 
-    void    on_gaze_event(int X, int Y);
     void    on_buttonMain_clicked();
+
 
 };
 

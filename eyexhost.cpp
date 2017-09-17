@@ -11,6 +11,15 @@ EyeXHost::EyeXHost(QObject *parent) : QObject(parent),
     _gazeInteractorSnapshot(TX_EMPTY_HANDLE),
     _state(Initializing) {
 
+
+    mouse           = Mouse::Off;
+    ema_size        = 20;
+    ema_multiplier  = 2.0 / (ema_size + 1);
+    gazeX           = 0;
+    gazeY           = 0;
+    emaX            = 0;
+    emaY            = 0;
+
     bool success = true;
 
     success &= txInitializeEyeX(TX_EYEXCOMPONENTOVERRIDEFLAG_NONE, nullptr, nullptr, nullptr, nullptr) == TX_RESULT_OK;
@@ -20,7 +29,15 @@ EyeXHost::EyeXHost(QObject *parent) : QObject(parent),
     success &= RegisterQueryHandler();
     success &= RegisterEventHandler();
 
-    if (!success) qDebug() << "EyeX did not initialize properly";
+    if (!success) {
+        qDebug() << "EyeX did not initialize properly";
+        return;
+    }
+
+    QObject::connect(
+                this, SIGNAL(GazeEvent(int, int)),
+                this, SLOT(on_GazeEvent(int, int))
+    );
 }
 
 
@@ -36,7 +53,7 @@ EyeXHost::~EyeXHost() {
         success &= txReleaseContext(&_context) == TX_RESULT_OK;
         success &= txUninitializeEyeX() == TX_RESULT_OK;
 
-        if (!success) qDebug() << "EyeX did not shut down cleanly";
+        if (!success) qDebug() << "EyeX did not shut down properly";
     }
 }
 
@@ -199,4 +216,32 @@ void EyeXHost::TriggerActivation() {
     txCreateActionCommand(_context, &command, TX_ACTIONTYPE_ACTIVATE);
     txExecuteCommandAsync(command, NULL, NULL);
     txReleaseObject(&command);
+}
+
+
+void EyeXHost::on_GazeEvent(int X, int Y) {
+
+    if (mouse == Mouse::Off || X < 1 || Y < 1) return;
+
+    if ((GetKeyState(VK_LBUTTON) & 0x80) != 0) return;
+    if ((GetKeyState(VK_RBUTTON) & 0x80) != 0) return;
+
+    gazeX = X;
+    gazeY = Y;
+
+    emaX = ((gazeX - emaX) * ema_multiplier) + emaX;
+    emaY = ((gazeY - emaY) * ema_multiplier) + emaY;
+
+    if (mouse == Mouse::Gaze) {
+
+        HWND desktop = GetDesktopWindow();
+        HDC dc = GetDC(desktop);
+        RECT rect = { emaX, emaY, emaX+1, emaY+1  };
+        HBRUSH brush = CreateSolidBrush( RGB(128, 255, 255) );
+        FillRect(dc, &rect, brush);
+
+    } else if (mouse == Mouse::Control) {
+
+        QCursor::setPos(emaX, emaY);
+    }
 }

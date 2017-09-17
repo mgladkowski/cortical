@@ -25,20 +25,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     this->move(desired_X, desired_Y);
 
 
-    // initialize HID state
-
-    ema_size        = 20;
-    ema_multiplier  = 2.0 / (ema_size + 1);
-    eyeMouse        = true;
-    gazeX           = 0;
-    gazeY           = 0;
-    emaX            = 0;
-    emaY            = 0;
-
-    QObject::connect(
-                &eyes, SIGNAL(GazeEvent(int, int)),
-                this, SLOT(on_gaze_event(int,int))
-    );
+    // initialize HID
 
     eyes.Init( (HWND)this->winId() );
 }
@@ -50,26 +37,17 @@ MainWindow::~MainWindow() {
 }
 
 
-void MainWindow::on_gaze_event(int X, int Y) {
+void MainWindow::on_buttonMain_clicked() {
 
-    if (!eyeMouse) return;
-
-    if (X < 1 || Y < 1) return;
-
-    if ((GetKeyState(VK_LBUTTON) & 0x80) != 0) return;
-    if ((GetKeyState(VK_RBUTTON) & 0x80) != 0) return;
-
-    gazeX = X;
-    gazeY = Y;
-
-    emaX = ((gazeX - emaX) * ema_multiplier) + emaX;
-    emaY = ((gazeY - emaY) * ema_multiplier) + emaY;
-
-    QCursor::setPos(emaX, emaY);
+    eyes.mouse = (eyes.mouse == EyeXHost::Mouse::Off)
+            ? EyeXHost::Mouse::Control
+            : EyeXHost::Mouse::Off;
 }
 
 
-void MainWindow::on_buttonMain_clicked() {
+void MainWindow::on_hotkey_pressed() {
 
-    this->close();
+    eyes.mouse = (eyes.mouse == EyeXHost::Mouse::Off)
+            ? EyeXHost::Mouse::Control
+            : EyeXHost::Mouse::Off;
 }

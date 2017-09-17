@@ -20,6 +20,7 @@ TARGET = Cortical
 TEMPLATE = app
 
 LIBS += D:/Qt/projects/Cortical/lib/Tobii.EyeX.Client.lib
+LIBS += D:/Qt/projects/Cortical/lib/gdi32.lib
 
 include(qhotkey.pri)
 
