@@ -57,12 +57,14 @@ public:
     float   ema_multiplier;
 
     void Init(HWND hWnd);
+    void AttachGlobalInteractor();
 
     bool IsFunctional();
 
     void SetActivatableRegions(const std::vector<ActivatableRegion> & regions);
 
     void TriggerActivation();
+    void TriggerActivationModeOn();
 
 
 private:
@@ -87,6 +89,8 @@ private:
 
     void HandleQuery(TX_CONSTHANDLE hAsyncData);
     void HandleEvent(TX_CONSTHANDLE hAsyncData);
+    void OnActivationFocusChanged(TX_HANDLE hBehavior, int interactorId);
+    void OnActivated(TX_HANDLE hBehavior, int interactorId);
 
     static void TX_CALLCONVENTION OnSnapshotCommitted(TX_CONSTHANDLE hAsyncData, TX_USERPARAM param);
 
@@ -99,10 +103,14 @@ signals:
 
     void GazeEvent(int X, int Y);
 
+    void ActivationEvent(int interactorId);
+
+    void ActivationFocusEvent(int interactorId);
+
 
 public slots:
 
-    void on_GazeEvent(int X, int Y);
+    void OnGazeEvent(int X, int Y);
 
 };
 

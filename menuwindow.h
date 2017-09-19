@@ -1,7 +1,7 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef MENUWINDOW_H
+#define MENUWINDOW_H
 
-#include <QMainWindow>
+#include <QDialog>
 #include <QDebug>
 #include <QDesktopWidget>
 #include <QHotkey>
@@ -14,11 +14,8 @@
 #include "dialogmode.h"
 #include "dialogeyex.h"
 #include "dialogbci.h"
+#include "mainwindow.h"
 
-
-#define IDC_ACTIVATOR_BUTTON    101
-#define IDC_MOUSE_BUTTON        102
-#define IDC_BCI_BUTTON          103
 
 #define IDC_BUTTON_MENU_MODE    201
 #define IDC_BUTTON_MENU_EYEX    202
@@ -26,29 +23,30 @@
 
 
 namespace Ui {
-class MainWindow;
+class MenuWindow;
 }
 
+class MainWindow;
 
-class MainWindow : public QMainWindow {
+class MenuWindow : public QDialog {
 
     Q_OBJECT
 
 
 public:
 
-    explicit    MainWindow(QWidget *parent = 0);
-                ~MainWindow();
+    explicit    MenuWindow(QWidget *parent = 0);
+                ~MenuWindow();
     bool        eventFilter(QObject *obj, QEvent *event);
 
-    EyeXHost    eyes;
+    MainWindow  *mainWindow;
 
-    void        on_hotkey_pressed();
+    void        UpdateActivatableRegions(std::vector<ActivatableRegion> & regions);
 
 
 private:
 
-    Ui::MainWindow  *ui;
+    Ui::MenuWindow *ui;
 
     DialogMode  *dialogMode;
     DialogEyeX  *dialogEyeX;
@@ -57,16 +55,12 @@ private:
     QTimer      progressTimer;
     QTimer      currentTimer;
     int         currentInteractor   = -1;
-    int         intervalActivate    = 1000;
-    int         intervalProgress    = 50;
+    int         intervalActivate    = 1200;
+    int         intervalProgress    = 60;
     float       progressCounter     = 0.0;
 
     RECT        GetScreenBounds(QPushButton * button);
-    void        UpdateActivatableRegions();
     void        ClearDelays();
-    void        ToggleMouse();
-    void        ToggleBrain();
-    void        ToggleMenu();
 
 
 signals:
@@ -87,12 +81,11 @@ private slots:
     void        on_Timer();
     void        on_ButtonEnterEvent(QPushButton * button);
     void        on_ButtonLeaveEvent(QPushButton * button);
-    void        on_buttonMain_clicked();
-    void        on_buttonMouse_clicked();
-    void        on_buttonBCI_clicked();
-    void        on_buttonOpenBci_clicked();
-    void        on_buttonEyeX_clicked();
     void        on_buttonMode_clicked();
+    void        on_buttonEyeX_clicked();
+    void        on_buttonOpenBci_clicked();
+    void        on_MenuWindow_finished(int result);
+
 };
 
-#endif // MAINWINDOW_H
+#endif // MENUWINDOW_H

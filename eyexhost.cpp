@@ -7,7 +7,7 @@ EyeXHost::EyeXHost(QObject *parent) : QObject(parent),
     _connectionStateChangedTicket(0),
     _queryHandlerTicket(0),
     _eventHandlerTicket(0),
-    _gazeInteractorId((char *)"interactor-gazedata"),
+    _gazeInteractorId((char *)"100"),
     _gazeInteractorSnapshot(TX_EMPTY_HANDLE),
     _state(Initializing) {
 
@@ -20,24 +20,6 @@ EyeXHost::EyeXHost(QObject *parent) : QObject(parent),
     emaX            = 0;
     emaY            = 0;
 
-    bool success = true;
-
-    success &= txInitializeEyeX(TX_EYEXCOMPONENTOVERRIDEFLAG_NONE, nullptr, nullptr, nullptr, nullptr) == TX_RESULT_OK;
-    success &= txCreateContext(&_context, TX_FALSE) == TX_RESULT_OK;
-    success &= InitializeGlobalInteractorSnapshot();
-    success &= RegisterConnectionStateChangedHandler();
-    success &= RegisterQueryHandler();
-    success &= RegisterEventHandler();
-
-    if (!success) {
-        qDebug() << "EyeX did not initialize properly";
-        return;
-    }
-
-    QObject::connect(
-                this, SIGNAL(GazeEvent(int, int)),
-                this, SLOT(on_GazeEvent(int, int))
-    );
 }
 
 
@@ -61,9 +43,36 @@ EyeXHost::~EyeXHost() {
 void EyeXHost::Init(HWND hWnd) {
 
     _hWnd = hWnd;
-    if (txEnableConnection(_context) != TX_RESULT_OK) {
+
+    bool success = true;
+
+    success &= txInitializeEyeX(TX_EYEXCOMPONENTOVERRIDEFLAG_NONE, nullptr, nullptr, nullptr, nullptr) == TX_RESULT_OK;
+    success &= txCreateContext(&_context, TX_FALSE) == TX_RESULT_OK;
+    success &= InitializeGlobalInteractorSnapshot();
+    success &= RegisterConnectionStateChangedHandler();
+    success &= RegisterQueryHandler();
+    success &= RegisterEventHandler();
+
+    if (!success) {
+
         SetState(Failed);
+        qDebug() << "EyeX did not initialize properly";
+        return;
     }
+
+    if (txEnableConnection(_context) != TX_RESULT_OK) {
+
+        SetState(Failed);
+        qDebug() << "EyeX did not connect properly";
+        return;
+    }
+
+    QObject::connect(
+                this, SIGNAL(GazeEvent(int, int)),
+                this, SLOT(OnGazeEvent(int, int))
+    );
+
+
 }
 
 
@@ -183,11 +192,13 @@ void EyeXHost::HandleQuery(TX_CONSTHANDLE hAsyncData) {
 
     sprintf(windowId, "%d", reinterpret_cast<std::uintptr_t>(_hWnd));
 
-    if (QueryIsForWindowId(hQuery, windowId)) {
+    if ( QueryIsForWindowId(hQuery, windowId) ) {
 
-        // define options for our activatable regions: no, we don't want tentative focus events
+        //qDebug() << "query " << (INT)pX << " " << (INT)pY;
 
-        TX_ACTIVATABLEPARAMS params = { TX_FALSE };
+        // define options for our activatable regions: yes, we want tentative focus events
+
+        TX_ACTIVATABLEPARAMS params = { TX_TRUE };
 
         // iterate through all regions and create interactors for those that overlap with the query bounds
 
@@ -226,15 +237,44 @@ void EyeXHost::HandleQuery(TX_CONSTHANDLE hAsyncData) {
 
 void EyeXHost::HandleEvent(TX_CONSTHANDLE hAsyncData) {
 
-    TX_HANDLE hEvent = TX_EMPTY_HANDLE;
-    TX_HANDLE hBehavior = TX_EMPTY_HANDLE;
+    TX_HANDLE hEvent        = TX_EMPTY_HANDLE;
+    TX_HANDLE hActivatable  = TX_EMPTY_HANDLE;
+    TX_HANDLE hBehavior     = TX_EMPTY_HANDLE;
 
     txGetAsyncDataContent(hAsyncData, &hEvent);
 
+    if (txGetEventBehavior(hEvent, &hActivatable, TX_BEHAVIORTYPE_ACTIVATABLE) == TX_RESULT_OK) {
+
+        int         interactorId;
+        const int   bufferSize = 20;
+        TX_CHAR     stringBuffer[bufferSize];
+        TX_SIZE     idLength(bufferSize);
+
+        if (txGetEventInteractorId(hEvent, stringBuffer, &idLength) == TX_RESULT_OK) {
+
+            interactorId = atoi(stringBuffer);
+        }
+
+        TX_ACTIVATABLEEVENTTYPE eventType;
+
+        if (txGetActivatableEventType(hActivatable, &eventType) == TX_RESULT_OK) {
+
+            if (eventType == TX_ACTIVATABLEEVENTTYPE_ACTIVATED) {
+
+                OnActivated(hActivatable, interactorId);
+
+            } else if (eventType == TX_ACTIVATABLEEVENTTYPE_ACTIVATIONFOCUSCHANGED) {
+
+                OnActivationFocusChanged(hActivatable, interactorId);
+            }
+        }
+        txReleaseObject(&hActivatable);
+    }
     if (txGetEventBehavior(hEvent, &hBehavior, TX_BEHAVIORTYPE_GAZEPOINTDATA) == TX_RESULT_OK) {
 
         TX_GAZEPOINTDATAEVENTPARAMS e;
         if (txGetGazePointDataEventParams(hBehavior, &e) == TX_RESULT_OK) {
+
             int x = static_cast<int>(e.X);
             int y = static_cast<int>(e.Y);
             emit GazeEvent(x, y);
@@ -265,6 +305,7 @@ bool EyeXHost::QueryIsForWindowId(TX_HANDLE hQuery, const TX_CHAR* windowId) {
 
             TX_SIZE size = bufferSize;
             if (TX_RESULT_OK == txGetQueryWindowId(hQuery, i, buffer, &size)) {
+
                 if (0 == strcmp(windowId, buffer)) return true;
             }
         }
@@ -297,7 +338,16 @@ void EyeXHost::TriggerActivation() {
 }
 
 
-void EyeXHost::on_GazeEvent(int X, int Y) {
+void EyeXHost::TriggerActivationModeOn()
+{
+    TX_HANDLE command(TX_EMPTY_HANDLE);
+    txCreateActionCommand(_context, &command, TX_ACTIONTYPE_ACTIVATIONMODEON);
+    txExecuteCommandAsync(command, NULL, NULL);
+    txReleaseObject(&command);
+}
+
+
+void EyeXHost::OnGazeEvent(int X, int Y) {
 
     if (mouse == Mouse::Off || X < 1 || Y < 1) return;
 
@@ -323,3 +373,28 @@ void EyeXHost::on_GazeEvent(int X, int Y) {
         QCursor::setPos(emaX, emaY);
     }
 }
+
+
+void EyeXHost::OnActivationFocusChanged(TX_HANDLE hBehavior, int interactorId) {
+
+    TX_ACTIVATIONFOCUSCHANGEDEVENTPARAMS eventData;
+    if (txGetActivationFocusChangedEventParams(hBehavior, &eventData) == TX_RESULT_OK) {
+
+        if (eventData.HasTentativeActivationFocus) {
+
+            emit ActivationFocusEvent(interactorId);
+
+        } else {
+
+            emit ActivationFocusEvent(-1);
+        }
+    }
+}
+
+
+void EyeXHost::OnActivated(TX_HANDLE hBehavior, int interactorId) {
+
+    emit ActivationEvent(interactorId);
+}
+
+
