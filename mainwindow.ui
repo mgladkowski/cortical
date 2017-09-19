@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>878</width>
-    <height>506</height>
+    <width>900</width>
+    <height>500</height>
    </rect>
   </property>
   <property name="mouseTracking">
@@ -526,6 +526,19 @@ QPushButton:hover{
     </property>
     <property name="orientation">
      <enum>Qt::Horizontal</enum>
+    </property>
+   </widget>
+   <widget class="QWidget" name="widgetContainer" native="true">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>10</y>
+      <width>361</width>
+      <height>231</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">border: 1px solid red;</string>
     </property>
    </widget>
   </widget>
