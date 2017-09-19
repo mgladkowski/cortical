@@ -370,7 +370,16 @@ void EyeXHost::OnGazeEvent(int X, int Y) {
 
     } else if (mouse == Mouse::Control) {
 
-        QCursor::setPos(emaX, emaY);
+        //QCursor::setPos(emaX, emaY);
+
+        INPUT im;
+        im.type = INPUT_MOUSE;
+        im.mi.time = 0;
+        im.mi.mouseData = 0;
+        im.mi.dx = emaX * (65536 / GetSystemMetrics(SM_CXSCREEN));
+        im.mi.dy = emaY * (65536 / GetSystemMetrics(SM_CYSCREEN));
+        im.mi.dwFlags = MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE;
+        SendInput(1, &im, sizeof(INPUT));
     }
 }
 

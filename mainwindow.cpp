@@ -150,37 +150,13 @@ void MainWindow::UpdateActivatableRegions() {
 
     std::vector<ActivatableRegion> regions;
 
-    regions.push_back(ActivatableRegion(IDC_ACTIVATOR_BUTTON, GetScreenBounds(ui->buttonMain)));
-    regions.push_back(ActivatableRegion(IDC_MOUSE_BUTTON, GetScreenBounds(ui->buttonMouse)));
-    regions.push_back(ActivatableRegion(IDC_BCI_BUTTON, GetScreenBounds(ui->buttonBCI)));
+    QList<QPushButton*> list = this->findChildren<QPushButton *>();
 
-    if (IsVisibleMenu()) {
+    foreach(QPushButton *b, list) {
 
-        regions.push_back(ActivatableRegion(IDC_BUTTON_MENU_MODE, GetScreenBounds(ui->buttonMode)));
-        regions.push_back(ActivatableRegion(IDC_BUTTON_MENU_EYEX, GetScreenBounds(ui->buttonEyeX)));
-        regions.push_back(ActivatableRegion(IDC_BUTTON_MENU_BCI, GetScreenBounds(ui->buttonOpenBci)));
-    }
-
-    if (IsVisibleDialogMode()) {
-
-        regions.push_back(ActivatableRegion(IDC_BUTTON_MODE_READ, GetScreenBounds(ui->buttonModeRead)));
-        regions.push_back(ActivatableRegion(IDC_BUTTON_MODE_QT, GetScreenBounds(ui->buttonModeQt)));
-        regions.push_back(ActivatableRegion(IDC_BUTTON_MODE_PHP, GetScreenBounds(ui->buttonModePhp)));
-        regions.push_back(ActivatableRegion(IDC_BUTTON_MODE_OFF, GetScreenBounds(ui->buttonModeOff)));
-    }
-    if (IsVisibleDialogEye()) {
-
-        regions.push_back(ActivatableRegion(IDC_BUTTON_EYEX_1, GetScreenBounds(ui->buttonEye1)));
-        regions.push_back(ActivatableRegion(IDC_BUTTON_EYEX_2, GetScreenBounds(ui->buttonEye2)));
-        regions.push_back(ActivatableRegion(IDC_BUTTON_EYEX_3, GetScreenBounds(ui->buttonEye3)));
-        regions.push_back(ActivatableRegion(IDC_BUTTON_EYEX_4, GetScreenBounds(ui->buttonEye4)));
-    }
-    if (IsVisibleDialogBrain()) {
-
-        regions.push_back(ActivatableRegion(IDC_BUTTON_BCI_1, GetScreenBounds(ui->buttonBci1)));
-        regions.push_back(ActivatableRegion(IDC_BUTTON_BCI_2, GetScreenBounds(ui->buttonBci2)));
-        regions.push_back(ActivatableRegion(IDC_BUTTON_BCI_3, GetScreenBounds(ui->buttonBci3)));
-        regions.push_back(ActivatableRegion(IDC_BUTTON_BCI_4, GetScreenBounds(ui->buttonBci4)));
+        if (b->isVisible()) {
+            regions.push_back(ActivatableRegion(b->winId(), GetScreenBounds(b)));
+        }
     }
 
     eyes.SetActivatableRegions(regions);
@@ -189,9 +165,10 @@ void MainWindow::UpdateActivatableRegions() {
 
 void MainWindow::SetInteractorProfile() {
 
+    AddInteractor( InteractorParam( 900,   50,   200,  50, "interactor_PGUP", "601") );
+    AddInteractor( InteractorParam( 900, 1000,   200,  50, "interactor_PGDN", "602") );
+    AddInteractor( InteractorParam(  20,   50,    50,  50, "interactor_BACK", "603") );
 
-    AddInteractor( InteractorParam(900,50,200,50,"button_INTERAC_1","") );
-    AddInteractor( InteractorParam(900,1000,200,50,"button_INTERAC_2","") );
     UpdateActivatableRegions();
 }
 
@@ -225,9 +202,19 @@ void MainWindow::ClearDelays() {
     progressTimer.stop();
     progressCounter = 0;
 
-    ui->buttonMain->setStyleSheet("");
-    ui->buttonMouse->setStyleSheet("");
-    ui->buttonBCI->setStyleSheet("");
+    QPushButton *sender = qobject_cast<QPushButton*>( QWidget::find( (WId)currentInteractor ) );
+    if (!sender) return;
+    QString senderName = sender->objectName();
+    QString css = "";
+
+    if ((senderName == IDC_MOUSE_BUTTON)        ||
+        (senderName == IDC_ACTIVATOR_BUTTON)    ||
+        (senderName == IDC_BCI_BUTTON)          ||
+        (senderName == IDC_BUTTON_MODE_OFF)     ||
+        (senderName == IDC_BUTTON_MODE_READ)    ){
+
+        sender->setStyleSheet( css );
+    }
 }
 
 
@@ -235,14 +222,6 @@ void MainWindow::on_hotkey_pressed() {
 
     ClearDelays();
     ToggleMouse();
-}
-
-
-void MainWindow::on_InteractorActivated() {
-
-    QObject *sender = QObject::sender();
-    qDebug() << qPrintable(sender->objectName());
-
 }
 
 
@@ -321,39 +300,117 @@ void MainWindow::on_ActivationFocusEvent(int interactorId) {
     currentInteractor = interactorId;
     ClearDelays();
 
-    if (currentInteractor == IDC_BUTTON_MENU_MODE) {
+    QPushButton *sender = qobject_cast<QPushButton*>( QWidget::find( (WId)interactorId ) );
+    if (!sender) return;
+    QString senderName = sender->objectName();
 
-        GazeHover( ui->buttonMode );
-        on_buttonMode_clicked();
-    }
-    else if (currentInteractor == IDC_BUTTON_MENU_EYEX) {
+    if ((senderName == IDC_BUTTON_MENU_MODE) ||
+        (senderName == IDC_BUTTON_MENU_EYEX) ||
+        (senderName == IDC_BUTTON_MENU_BCI)  ){
 
-        GazeHover( ui->buttonEyeX );
-        on_buttonEyeX_clicked();
-    }
-    else if (currentInteractor == IDC_BUTTON_MENU_BCI) {
+        GazeHover( sender );
+        sender->click();
 
-        GazeHover( ui->buttonOpenBci );
-        on_buttonOpenBci_clicked();
-    }
+    } else
+    if ((senderName == IDC_ACTIVATOR_BUTTON) ||
+        (senderName == IDC_MOUSE_BUTTON)     ||
+        (senderName == IDC_BCI_BUTTON)       ||
+        (senderName == IDC_BUTTON_MODE_READ) ||
+        (senderName == IDC_BUTTON_MODE_QT)   ||
+        (senderName == IDC_BUTTON_MODE_PHP)  ||
+        (senderName == IDC_BUTTON_MODE_OFF)  ){
 
-    else if (currentInteractor == IDC_BUTTON_MODE_READ) {
-        GazeHover(ui->buttonModeRead);
-    }
-    else if (currentInteractor == IDC_BUTTON_MODE_QT) {
-        GazeHover(ui->buttonModeQt);
-    }
-    else if (currentInteractor == IDC_BUTTON_MODE_PHP) {
-        GazeHover(ui->buttonModePhp);
-    }
-    else if (currentInteractor == IDC_BUTTON_MODE_OFF) {
-        GazeHover(ui->buttonModeOff);
-    }
-
-    else if (interactorId > -1) {
-
-        currentTimer.start( intervalActivate );
+        GazeHover( sender );
+        currentTimer.start( intervalInteractor );
         progressTimer.start( intervalProgress );
+
+    } else
+    if ((senderName == INTERACTOR_BACK)      ||
+        (senderName == INTERACTOR_PGUP)      ||
+        (senderName == INTERACTOR_PGDN)      ){
+
+        currentTimer.start( intervalInteractor );
+        progressTimer.start( intervalProgress );
+
+    } else if (interactorId > 0) {
+
+        GazeHover( sender );
+    }
+}
+
+
+void MainWindow::on_InteractorActivated() {
+
+    QPushButton *sender = qobject_cast<QPushButton*>( QWidget::find( (WId)currentInteractor ) );
+    if (!sender) return;
+    QString senderName = sender->objectName();
+
+    INPUT ip;
+    ip.type = INPUT_KEYBOARD;
+    ip.ki.wScan = 0;
+    ip.ki.time = 0;
+    ip.ki.dwExtraInfo = 0;
+
+    if (senderName == INTERACTOR_BACK) {
+
+        // send ALT + LEFT
+
+        int key_count = 4;
+        INPUT * input = new INPUT[ key_count ];
+        for (int i = 0; i < key_count; i++) {
+            input[i].ki.dwFlags = 0;
+            input[i].type = INPUT_KEYBOARD;
+            input[i].ki.time = 0;
+        }
+        input[0].ki.wVk = VK_MENU;
+        input[0].ki.wScan = MapVirtualKey(VK_CONTROL, MAPVK_VK_TO_VSC);
+        input[1].ki.wVk = VK_LEFT;
+        input[1].ki.wScan = MapVirtualKey(VK_LEFT, MAPVK_VK_TO_VSC);
+        input[2].ki.dwFlags = KEYEVENTF_KEYUP;
+        input[2].ki.wVk = input[0].ki.wVk;
+        input[2].ki.wScan = input[0].ki.wScan;
+        input[3].ki.dwFlags = KEYEVENTF_KEYUP;
+        input[3].ki.wVk = input[1].ki.wVk;
+        input[3].ki.wScan = input[1].ki.wScan;
+        SendInput(key_count, (LPINPUT)input, sizeof(INPUT));
+
+    }
+    if (senderName == INTERACTOR_PGUP) {
+
+        // send PAGEUP
+
+        ip.ki.wVk = VK_PRIOR;
+        ip.ki.dwFlags = 0;
+        SendInput(1, &ip, sizeof(INPUT));
+        ip.ki.dwFlags = KEYEVENTF_KEYUP;
+        SendInput(1, &ip, sizeof(INPUT));
+
+    }
+    if (senderName == INTERACTOR_PGDN) {
+
+        // send PAGEDOWN
+
+        ip.ki.wVk = VK_NEXT;
+        ip.ki.dwFlags = 0;
+        SendInput(1, &ip, sizeof(INPUT));
+        ip.ki.dwFlags = KEYEVENTF_KEYUP;
+        SendInput(1, &ip, sizeof(INPUT));
+    }
+
+}
+
+
+void MainWindow::on_ThoughtActivated() {
+
+    if (brain.mouse == BciHost::Mouse::Control) {
+
+        INPUT im;
+        im.type = INPUT_MOUSE;
+        im.mi.time = 0;
+        im.mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
+        SendInput(1, &im, sizeof(INPUT));
+        im.mi.dwFlags = MOUSEEVENTF_LEFTUP;
+        SendInput(1, &im, sizeof(INPUT));
     }
 }
 
@@ -362,38 +419,61 @@ void MainWindow::on_Timer() {
 
     ClearDelays();
 
-    if (currentInteractor == IDC_MOUSE_BUTTON) {
+    QPushButton *sender = qobject_cast<QPushButton*>( QWidget::find( (WId)currentInteractor ) );
+    if (!sender) return;
+    QString senderName = sender->objectName();
+
+    if (senderName == IDC_MOUSE_BUTTON) {
 
         ToggleMouse();
     }
-    if (currentInteractor == IDC_ACTIVATOR_BUTTON) {
+    if (senderName == IDC_ACTIVATOR_BUTTON) {
 
         ToggleMenu();
     }
-    if (currentInteractor == IDC_BCI_BUTTON) {
+    if (senderName == IDC_BCI_BUTTON) {
 
         ToggleBrain();
+    }
+    if (senderName == IDC_BUTTON_MODE_OFF) {
+
+        ui->buttonModeOff->click();
+    }
+    if (senderName == IDC_BUTTON_MODE_READ) {
+
+        ui->buttonModeRead->click();
+    }
+    if ((senderName == INTERACTOR_BACK) ||
+        (senderName == INTERACTOR_PGUP) ||
+        (senderName == INTERACTOR_PGDN) ){
+
+        on_InteractorActivated();
     }
 }
 
 
 void MainWindow::on_Progress() {
 
+    QPushButton *sender = qobject_cast<QPushButton*>( QWidget::find( (WId)currentInteractor ) );
+    if (!sender) return;
+    QString senderName = sender->objectName();
+
     progressCounter = progressCounter + 0.05;
     if (progressCounter > 1) progressCounter = 1;
     QString css = "background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop: 0 #00fc00, stop: " + QString::number(progressCounter) + " #fcfcfc);";
 
-    if (currentInteractor == IDC_MOUSE_BUTTON) {
+    if ((senderName == IDC_MOUSE_BUTTON)        ||
+        (senderName == IDC_ACTIVATOR_BUTTON)    ||
+        (senderName == IDC_BCI_BUTTON)          ||
+        (senderName == IDC_BUTTON_MODE_OFF)     ||
+        (senderName == IDC_BUTTON_MODE_READ)    ){
 
-        ui->buttonMouse->setStyleSheet( css );
+        sender->setStyleSheet( css );
     }
-    if (currentInteractor == IDC_ACTIVATOR_BUTTON) {
+    if ((senderName == INTERACTOR_BACK)         ||
+        (senderName == INTERACTOR_PGUP)         ||
+        (senderName == INTERACTOR_PGDN)         ){
 
-        ui->buttonMain->setStyleSheet( css );
-    }
-    if (currentInteractor == IDC_BCI_BUTTON) {
-
-        ui->buttonBCI->setStyleSheet( css );
     }
 }
 
@@ -495,6 +575,7 @@ void MainWindow::GazeHover(QPushButton * button) {
 
     button->setStyleSheet("border: 3px solid #29B6F6; background: #D6EAF8;");
 }
+
 
 
 void MainWindow::ShowMenu(bool visible) {
@@ -604,6 +685,7 @@ void MainWindow::ShowDialogBrain(bool visible) {
 }
 
 
+
 bool MainWindow::IsVisibleMenu() {
 
     return ui->buttonMode->isVisible();
@@ -628,15 +710,30 @@ bool MainWindow::IsVisibleDialogBrain() {
 }
 
 
-void MainWindow::on_buttonOpenBci_clicked() {
 
-    if (IsVisibleDialogBrain()) return;
+void MainWindow::on_buttonMode_clicked() {
 
-    ShowDialogBrain( true );
+    if (IsVisibleDialogMode()) return;
 
-    SlideMenu(3);
+    ShowDialogMode( true );
+
+    SlideMenu(1);
 
     SuppressEyeEvents(intervalDebounce);
+}
+
+
+void MainWindow::on_buttonModeOff_clicked() {
+
+    ClearInteractorProfile();
+    ToggleMenu();
+}
+
+
+void MainWindow::on_buttonModeRead_clicked() {
+
+    SetInteractorProfile();
+    ToggleMenu();
 }
 
 
@@ -652,13 +749,15 @@ void MainWindow::on_buttonEyeX_clicked() {
 }
 
 
-void MainWindow::on_buttonMode_clicked() {
+void MainWindow::on_buttonOpenBci_clicked() {
 
-    if (IsVisibleDialogMode()) return;
+    if (IsVisibleDialogBrain()) return;
 
-    ShowDialogMode( true );
+    ShowDialogBrain( true );
 
-    SlideMenu(1);
+    SlideMenu(3);
 
     SuppressEyeEvents(intervalDebounce);
 }
+
+

@@ -17,12 +17,16 @@
 
 
 
-#define IDC_ACTIVATOR_BUTTON    101
-#define IDC_MOUSE_BUTTON        102
-#define IDC_BCI_BUTTON          103
-#define IDC_BUTTON_MENU_MODE    201
-#define IDC_BUTTON_MENU_EYEX    202
-#define IDC_BUTTON_MENU_BCI     203
+#define IDC_ACTIVATOR_BUTTON    "buttonMain"
+#define IDC_MOUSE_BUTTON        "buttonMouse"
+#define IDC_BCI_BUTTON          "buttonBci"
+#define IDC_BUTTON_MENU_MODE    "buttonMode"
+#define IDC_BUTTON_MENU_EYEX    "buttonEyeX"
+#define IDC_BUTTON_MENU_BCI     "buttonOpenBci"
+#define IDC_BUTTON_MODE_READ    "buttonModeRead"
+#define IDC_BUTTON_MODE_QT      "buttonModeQt"
+#define IDC_BUTTON_MODE_PHP     "buttonModePhp"
+#define IDC_BUTTON_MODE_OFF     "buttonModeOff"
 #define IDC_BUTTON_BCI_1        301
 #define IDC_BUTTON_BCI_2        302
 #define IDC_BUTTON_BCI_3        303
@@ -31,10 +35,6 @@
 #define IDC_BUTTON_EYEX_2       402
 #define IDC_BUTTON_EYEX_3       403
 #define IDC_BUTTON_EYEX_4       404
-#define IDC_BUTTON_MODE_READ    501
-#define IDC_BUTTON_MODE_QT      502
-#define IDC_BUTTON_MODE_PHP     503
-#define IDC_BUTTON_MODE_OFF     504
 
 
 #define MENU_POSITION_1         20
@@ -46,6 +46,10 @@
 #define MENU_POSITION_4         680
 #define LINE_POSITION_45        790
 #define MENU_POSITION_5         900
+
+#define INTERACTOR_BACK         "interactor_BACK"
+#define INTERACTOR_PGUP         "interactor_PGUP"
+#define INTERACTOR_PGDN         "interactor_PGDN"
 
 
 namespace Ui {
@@ -100,6 +104,7 @@ private:
     QTimer      suppressTimer;
     int         currentInteractor   = -1;
     int         intervalActivate    = 800;
+    int         intervalInteractor  = 1200;
     int         intervalProgress    = 40;
     int         intervalDebounce    = 600;
     float       progressCounter     = 0.0;
@@ -155,6 +160,7 @@ private slots:
     void        on_ButtonLeaveEvent(QPushButton * button);
 
     void        on_InteractorActivated();
+    void        on_ThoughtActivated();
 
     void        on_buttonMain_clicked();
     void        on_buttonMouse_clicked();
@@ -162,6 +168,8 @@ private slots:
     void        on_buttonOpenBci_clicked();
     void        on_buttonEyeX_clicked();
     void        on_buttonMode_clicked();
+    void on_buttonModeOff_clicked();
+    void on_buttonModeRead_clicked();
 };
 
 #endif // MAINWINDOW_H
