@@ -10,6 +10,7 @@
 #include <QTimer>
 #include <QThread>
 #include <QLabel>
+#include <QMessageBox>
 #include <windows.h>
 #include "eyexhost.h"
 #include "bcihost.h"
@@ -52,6 +53,27 @@ class MainWindow;
 }
 
 
+class InteractorParam {
+public:
+    int         x;
+    int         y;
+    int         width;
+    int         height;
+    QString     name;
+    QString     keypress;
+
+    InteractorParam(int px, int py, int pwidth, int pheight, QString pname, QString pkeypress) {
+
+        x       = px;
+        y       = py;
+        width   = pwidth;
+        height  = pheight;
+        name    = pname;
+        keypress= pkeypress;
+    }
+};
+
+
 class MainWindow : public QMainWindow {
 
     Q_OBJECT
@@ -84,9 +106,17 @@ private:
 
     bool        suppressEyeEvents   = false;
 
+    void        InitializeUi();
+
+    void        SetInteractorProfile();
+    void        ClearInteractorProfile();
+    void        AddInteractor( InteractorParam data );
     RECT        GetScreenBounds(QPushButton * button);
     void        UpdateActivatableRegions();
+
     void        ClearDelays();
+    void        SuppressEyeEvents( int msec );
+
     void        ToggleMouse();
     void        ToggleBrain();
     void        ToggleMenu();
@@ -102,7 +132,6 @@ private:
     bool        IsVisibleDialogEye();
     bool        IsVisibleDialogBrain();
 
-    void        SuppressEyeEvents( int msec );
 
 signals:
 
@@ -121,8 +150,12 @@ private slots:
     void        on_Progress();
     void        on_Timer();
     void        on_Suppress();
+
     void        on_ButtonEnterEvent(QPushButton * button);
     void        on_ButtonLeaveEvent(QPushButton * button);
+
+    void        on_InteractorActivated();
+
     void        on_buttonMain_clicked();
     void        on_buttonMouse_clicked();
     void        on_buttonBCI_clicked();

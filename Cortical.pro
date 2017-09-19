@@ -42,16 +42,13 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     eyexhost.cpp \
-    dialogmode.cpp \
     bcihost.cpp
 
 HEADERS += \
         mainwindow.h \
     eyex/EyeX.h \
     eyexhost.h \
-    dialogmode.h \
     bcihost.h
 
 FORMS += \
-        mainwindow.ui \
-    dialogmode.ui
+        mainwindow.ui

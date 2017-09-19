@@ -15,14 +15,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     ui->setupUi(this);
 
-
-    // sets position of main window (activator)
-
-    QRect desktopRect = QApplication::desktop()->availableGeometry(this);
-    QPoint center = desktopRect.center();
-    int desired_X = static_cast<int>( desktopRect.left() + (desktopRect.width() * 0.65) - 350 );
-    int desired_Y = static_cast<int>( desktopRect.bottom()-height()+20 );
-    this->move(desired_X, desired_Y);
+    InitializeUi();
 
 
     // dialogs
@@ -109,6 +102,27 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event) {
 }
 
 
+void MainWindow::InitializeUi() {
+
+
+    // sets position of main window (activator)
+
+    QRect   desktopRect = QApplication::desktop()->availableGeometry(this);
+    QPoint  center      = desktopRect.center();
+
+    this->showFullScreen();
+
+    ui->frameScreen->move( 0,0 );
+    ui->frameScreen->resize( this->width(), this->height() );
+
+    int main_X = static_cast<int>( desktopRect.left() + (desktopRect.width() * 0.65) - 350 );
+    int main_Y = static_cast<int>( desktopRect.bottom()- ui->widgetMain->height() );
+    ui->widgetMain->move( main_X, main_Y) ;
+
+    SetInteractorProfile();
+}
+
+
 /* Gets the bounds of a button in screen coordinates
  *
  */
@@ -173,6 +187,38 @@ void MainWindow::UpdateActivatableRegions() {
 }
 
 
+void MainWindow::SetInteractorProfile() {
+
+
+    AddInteractor( InteractorParam(900,50,200,50,"button_INTERAC_1","") );
+    AddInteractor( InteractorParam(900,1000,200,50,"button_INTERAC_2","") );
+    UpdateActivatableRegions();
+}
+
+
+void MainWindow::AddInteractor( InteractorParam data ) {
+
+    QPushButton *button = new QPushButton(ui->frameScreen);
+
+    button->setObjectName(data.name);
+    button->setText(tr(""));
+    button->setGeometry( data.x, data.y, data.width, data.height );
+    button->setStyleSheet("background:rgba(0,0,0,0.4);");
+
+    QObject::connect(button, SIGNAL(clicked(bool)), this, SLOT(on_InteractorActivated()) );
+
+    layout()->addWidget(button);
+}
+
+
+void MainWindow::ClearInteractorProfile() {
+
+    qDeleteAll(ui->frameScreen->findChildren<QWidget*>("", Qt::FindDirectChildrenOnly));
+
+    UpdateActivatableRegions();
+}
+
+
 void MainWindow::ClearDelays() {
 
     currentTimer.stop();
@@ -189,6 +235,14 @@ void MainWindow::on_hotkey_pressed() {
 
     ClearDelays();
     ToggleMouse();
+}
+
+
+void MainWindow::on_InteractorActivated() {
+
+    QObject *sender = QObject::sender();
+    qDebug() << qPrintable(sender->objectName());
+
 }
 
 
@@ -210,6 +264,7 @@ void MainWindow::on_buttonBCI_clicked() {
 
     ClearDelays();
     ToggleBrain();
+    ClearInteractorProfile();   // TEST
 }
 
 
