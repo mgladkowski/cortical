@@ -56,15 +56,11 @@ public:
     int     ema_size;
     float   ema_multiplier;
 
-    void Init(HWND hWnd);
-    void AttachGlobalInteractor();
-
-    bool IsFunctional();
-
-    void SetActivatableRegions(const std::vector<ActivatableRegion> & regions);
-
-    void TriggerActivation();
-    void TriggerActivationModeOn();
+    void    Init(HWND hWnd);
+    bool    IsFunctional();
+    void    SetActivatableRegions(const std::vector<ActivatableRegion> & regions);
+    void    TriggerActivation();
+    void    TriggerActivationModeOn();
 
 
 private:

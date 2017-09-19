@@ -45,7 +45,8 @@ SOURCES += \
     menuwindow.cpp \
     dialogmode.cpp \
     dialogeyex.cpp \
-    dialogbci.cpp
+    dialogbci.cpp \
+    bcihost.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -54,7 +55,8 @@ HEADERS += \
     menuwindow.h \
     dialogmode.h \
     dialogeyex.h \
-    dialogbci.h
+    dialogbci.h \
+    bcihost.h
 
 FORMS += \
         mainwindow.ui \
