@@ -19,7 +19,7 @@
 
 #define IDC_ACTIVATOR_BUTTON    "buttonMain"
 #define IDC_MOUSE_BUTTON        "buttonMouse"
-#define IDC_BCI_BUTTON          "buttonBci"
+#define IDC_BCI_BUTTON          "buttonBCI"
 #define IDC_BUTTON_MENU_MODE    "buttonMode"
 #define IDC_BUTTON_MENU_EYEX    "buttonEyeX"
 #define IDC_BUTTON_MENU_BCI     "buttonOpenBci"
@@ -37,15 +37,15 @@
 #define IDC_BUTTON_EYEX_4       404
 
 
-#define MENU_POSITION_1         20
-#define LINE_POSITION_12        130
-#define MENU_POSITION_2         240
-#define LINE_POSITION_23        350
-#define MENU_POSITION_3         460
-#define LINE_POSITION_34        570
-#define MENU_POSITION_4         680
-#define LINE_POSITION_45        790
-#define MENU_POSITION_5         900
+#define MENU_POSITION_1         90
+#define LINE_POSITION_12        200
+#define MENU_POSITION_2         310
+#define LINE_POSITION_23        420
+#define MENU_POSITION_3         530
+#define LINE_POSITION_34        640
+#define MENU_POSITION_4         750
+#define LINE_POSITION_45        860
+#define MENU_POSITION_5         970
 
 #define INTERACTOR_BACK         "interactor_BACK"
 #define INTERACTOR_PGUP         "interactor_PGUP"
@@ -126,7 +126,10 @@ private:
     void        ToggleBrain();
     void        ToggleMenu();
     void        SlideMenu( int position );
+
     void        GazeHover(QPushButton * button);
+    void        ClearHover();
+
     void        ShowMenu(bool visible);
     void        ShowDialogMode(bool visible);
     void        ShowDialogEye(bool visible);

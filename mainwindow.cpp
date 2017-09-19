@@ -256,13 +256,13 @@ void MainWindow::on_ButtonEnterEvent(QPushButton * button) {
     if (button == ui->buttonMain) {
     }
     if (button == ui->buttonMode) {
-        on_buttonMode_clicked();
+        button->click();
     }
     if (button == ui->buttonEyeX) {
-        on_buttonEyeX_clicked();
+        button->click();
     }
     if (button == ui->buttonOpenBci) {
-        on_buttonOpenBci_clicked();
+        button->click();
     }
 }
 
@@ -300,6 +300,10 @@ void MainWindow::on_ActivationFocusEvent(int interactorId) {
     currentInteractor = interactorId;
     ClearDelays();
 
+    if (interactorId == -1) {
+        ClearHover();
+    }
+
     QPushButton *sender = qobject_cast<QPushButton*>( QWidget::find( (WId)interactorId ) );
     if (!sender) return;
     QString senderName = sender->objectName();
@@ -320,8 +324,7 @@ void MainWindow::on_ActivationFocusEvent(int interactorId) {
         (senderName == IDC_BUTTON_MODE_PHP)  ||
         (senderName == IDC_BUTTON_MODE_OFF)  ){
 
-        GazeHover( sender );
-        currentTimer.start( intervalInteractor );
+        currentTimer.start( intervalActivate );
         progressTimer.start( intervalProgress );
 
     } else
@@ -564,16 +567,23 @@ void MainWindow::SlideMenu(int position) {
 
 void MainWindow::GazeHover(QPushButton * button) {
 
+    ClearHover();
+    if (button) button->setStyleSheet("border: 3px solid #29B6F6; background: #D6EAF8;");
+}
+
+
+void MainWindow::ClearHover() {
+
+    ui->buttonMouse->setStyleSheet("");
+    ui->buttonMain->setStyleSheet("");
+    ui->buttonBCI->setStyleSheet("");
     ui->buttonOpenBci->setStyleSheet("");
     ui->buttonEyeX->setStyleSheet("");
     ui->buttonMode->setStyleSheet("");
-
     ui->buttonModeRead->setStyleSheet("");
     ui->buttonModeQt->setStyleSheet("");
     ui->buttonModePhp->setStyleSheet("");
     ui->buttonModeOff->setStyleSheet("");
-
-    button->setStyleSheet("border: 3px solid #29B6F6; background: #D6EAF8;");
 }
 
 
