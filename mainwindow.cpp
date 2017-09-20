@@ -15,56 +15,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     ui->setupUi(this);
 
-    InitializeUi();
-
-
-    // dialogs
-
-    ShowMenu(false);
-
-
-    // button custom events
-
-    ui->buttonMode->installEventFilter(this);
-    ui->buttonEyeX->installEventFilter(this);
-    ui->buttonOpenBci->installEventFilter(this);
-
-    QObject::connect(
-                this, SIGNAL(ButtonEnterEvent(QPushButton*)),
-                this, SLOT(on_ButtonEnterEvent(QPushButton*))
-    );
-    QObject::connect(
-                this, SIGNAL(ButtonLeaveEvent(QPushButton*)),
-                this, SLOT(on_ButtonLeaveEvent(QPushButton*))
-    );
-
-
     // initialize HID
-
-    UpdateActivatableRegions();
 
     eyes.Init( (HWND)this->winId() );
 
-    QObject::connect(
-                &currentTimer, SIGNAL(timeout()),
-                this, SLOT(on_Timer())
-    );
-    QObject::connect(
-                &progressTimer, SIGNAL(timeout()),
-                this, SLOT(on_Progress())
-    );
-    QObject::connect(
-                &suppressTimer, SIGNAL(timeout()),
-                this, SLOT(on_Suppress())
-    );
-    QObject::connect(
-                &eyes, SIGNAL(ActivationEvent(int)),
-                this, SLOT(on_ActivationEvent(int))
-    );
-    QObject::connect(
-                &eyes, SIGNAL(ActivationFocusEvent(int)),
-                this, SLOT(on_ActivationFocusEvent(int))
-    );
+    InitializeUi();
+
+    ShowMenu( false );
 
 }
 
@@ -75,37 +32,10 @@ MainWindow::~MainWindow() {
 }
 
 
-/* Override hover event
- *
- */
-bool MainWindow::eventFilter(QObject *obj, QEvent *event) {
-
-    // called for QObjects that installed eventFilter so we filter for desired buttons
-
-    if (   obj == (QObject*)ui->buttonMouse
-        || obj == (QObject*)ui->buttonBCI
-        || obj == (QObject*)ui->buttonMain ) {
-
-        if (event->type() == QEvent::Enter) {
-
-            emit ButtonEnterEvent( (QPushButton*)obj );
-
-        } else if (event->type() == QEvent::Leave) {
-
-            emit ButtonLeaveEvent( (QPushButton*)obj );
-        }
-    }
-
-    // pass the event on to the parent class
-
-    return QWidget::eventFilter(obj, event);
-}
-
-
 void MainWindow::InitializeUi() {
 
 
-    // sets position of main window (activator)
+    // sets position of main window objects
 
     QRect   desktopRect = QApplication::desktop()->availableGeometry(this);
     QPoint  center      = desktopRect.center();
@@ -117,16 +47,46 @@ void MainWindow::InitializeUi() {
 
     int main_X = static_cast<int>( desktopRect.left() + (desktopRect.width() * 0.65) - 350 );
     int main_Y = static_cast<int>( desktopRect.bottom()- ui->widgetMain->height() );
+
     ui->widgetMain->move( main_X, main_Y) ;
 
-    SetInteractorProfile();
+
+    // connect events for each designer control
+
+    QList<EyeButton*> list = this->findChildren<EyeButton *>();
+    foreach(EyeButton *b, list) {
+
+        if (b->isInteractor == false) {
+
+            QObject::connect(
+                        &eyes, SIGNAL(ActivationEvent(int)),
+                        b, SLOT(on_ActivationEvent(int))
+            );
+            QObject::connect(
+                        &eyes, SIGNAL(ActivationFocusEvent(int)),
+                        b, SLOT(on_ActivationFocusEvent(int))
+            );
+            QObject::connect(
+                        b, SIGNAL(ActivationEvent(int)),
+                        this, SLOT(on_ActivationEvent(int))
+            );
+            b->setActivationType( ActivatorFlags::ACTIVATE_NORMAL );
+            b->setFocusPolicy(Qt::NoFocus);
+        }
+    }
+
+    ActivatorFlags flags = ActivatorFlags::ACTIVATE_QUICK | ActivatorFlags::HIDE_PROGRESS_BAR;
+    ui->buttonOpenBci->setActivationType( flags );
+    ui->buttonEyeX->setActivationType( flags );
+    ui->buttonMode->setActivationType( flags );
+
 }
 
 
 /* Gets the bounds of a button in screen coordinates
  *
  */
-RECT MainWindow::GetScreenBounds(QPushButton * button) {
+RECT MainWindow::GetScreenBounds(EyeButton * button) {
 
     HWND hButton = (HWND)button->winId();
     QSize size = button->size();
@@ -150,9 +110,9 @@ void MainWindow::UpdateActivatableRegions() {
 
     std::vector<ActivatableRegion> regions;
 
-    QList<QPushButton*> list = this->findChildren<QPushButton *>();
+    QList<EyeButton*> list = this->findChildren<EyeButton *>();
 
-    foreach(QPushButton *b, list) {
+    foreach(EyeButton *b, list) {
 
         if (b->isVisible()) {
             regions.push_back(ActivatableRegion(b->winId(), GetScreenBounds(b)));
@@ -165,9 +125,11 @@ void MainWindow::UpdateActivatableRegions() {
 
 void MainWindow::SetInteractorProfile() {
 
-    AddInteractor( InteractorParam( 900,   50,   200,  50, "interactor_PGUP", "601") );
-    AddInteractor( InteractorParam( 900, 1000,   200,  50, "interactor_PGDN", "602") );
-    AddInteractor( InteractorParam(  20,   50,    50,  50, "interactor_BACK", "603") );
+    AddInteractor( InteractorParam(  900,   50,   200,  50, INTERACTOR_PGUP, ActivatorFlags::ACTIVATE_NORMAL | ActivatorFlags::INTERACTOR_DEFAULT) );
+    AddInteractor( InteractorParam(  900, 1000,   200,  50, INTERACTOR_PGDN, ActivatorFlags::ACTIVATE_NORMAL | ActivatorFlags::INTERACTOR_DEFAULT) );
+    AddInteractor( InteractorParam( 1750,  700,    50,  50, INTERACTOR_BACK, ActivatorFlags::ACTIVATE_NORMAL | ActivatorFlags::INTERACTOR_DEFAULT) );
+    AddInteractor( InteractorParam( 1750,  800,    50,  50, INTERACTOR_NEWTAB, ActivatorFlags::ACTIVATE_NORMAL | ActivatorFlags::INTERACTOR_DEFAULT) );
+    AddInteractor( InteractorParam( 1750,  900,    50,  50, INTERACTOR_CLSTAB, ActivatorFlags::ACTIVATE_SLOW | ActivatorFlags::INTERACTOR_DANGER) );
 
     UpdateActivatableRegions();
 }
@@ -175,176 +137,78 @@ void MainWindow::SetInteractorProfile() {
 
 void MainWindow::AddInteractor( InteractorParam data ) {
 
-    QPushButton *button = new QPushButton(ui->frameScreen);
+    EyeButton *button = new EyeButton(ui->frameScreen);
 
     button->setObjectName(data.name);
     button->setText(tr(""));
     button->setGeometry( data.x, data.y, data.width, data.height );
-    button->setStyleSheet("background:rgba(0,0,0,0.4);");
 
-    QObject::connect(button, SIGNAL(clicked(bool)), this, SLOT(on_InteractorActivated()) );
+    QObject::connect(
+                button, SIGNAL(ActivationEvent(int)),
+                this, SLOT(on_InteractorActivated())
+    );
+    QObject::connect(
+                &eyes, SIGNAL(ActivationEvent(int)),
+                button, SLOT(on_ActivationEvent(int))
+    );
+    QObject::connect(
+                &eyes, SIGNAL(ActivationFocusEvent(int)),
+                button, SLOT(on_ActivationFocusEvent(int))
+    );
 
-    layout()->addWidget(button);
+    button->setActivationType( data.flags );
+    button->setFocusPolicy(Qt::NoFocus);
+
+    this->layout()->addWidget( button );
 }
 
 
 void MainWindow::ClearInteractorProfile() {
 
-    qDeleteAll(ui->frameScreen->findChildren<QWidget*>("", Qt::FindDirectChildrenOnly));
+    QList<EyeButton*> list = this->findChildren<EyeButton *>();
+    foreach(EyeButton *b, list) {
+
+        if (b->isInteractor == true) {
+            delete b;
+        }
+    }
 
     UpdateActivatableRegions();
 }
 
 
-void MainWindow::ClearDelays() {
-
-    currentTimer.stop();
-    progressTimer.stop();
-    progressCounter = 0;
-
-    QPushButton *sender = qobject_cast<QPushButton*>( QWidget::find( (WId)currentInteractor ) );
-    if (!sender) return;
-    QString senderName = sender->objectName();
-    QString css = "";
-
-    if ((senderName == IDC_MOUSE_BUTTON)        ||
-        (senderName == IDC_ACTIVATOR_BUTTON)    ||
-        (senderName == IDC_BCI_BUTTON)          ||
-        (senderName == IDC_BUTTON_MODE_OFF)     ||
-        (senderName == IDC_BUTTON_MODE_READ)    ){
-
-        sender->setStyleSheet( css );
-    }
-}
-
-
 void MainWindow::on_hotkey_pressed() {
 
-    ClearDelays();
     ToggleMouse();
 }
 
 
 void MainWindow::on_buttonMain_clicked() {
 
-    ClearDelays();
     ToggleMenu();
 }
 
 
 void MainWindow::on_buttonMouse_clicked(){
 
-    ClearDelays();
     ToggleMouse();
 }
 
 
 void MainWindow::on_buttonBCI_clicked() {
 
-    ClearDelays();
     ToggleBrain();
-    ClearInteractorProfile();   // TEST
-}
-
-
-void MainWindow::on_ButtonEnterEvent(QPushButton * button) {
-
-    if (button == ui->buttonMouse) {
-    }
-    if (button == ui->buttonBCI) {
-    }
-    if (button == ui->buttonMain) {
-    }
-    if (button == ui->buttonMode) {
-        button->click();
-    }
-    if (button == ui->buttonEyeX) {
-        button->click();
-    }
-    if (button == ui->buttonOpenBci) {
-        button->click();
-    }
-}
-
-
-void MainWindow::on_ButtonLeaveEvent(QPushButton * button) {
-
-    if (button == ui->buttonMouse) {
-    }
-    if (button == ui->buttonBCI) {
-    }
-    if (button == ui->buttonMain) {
-    }
-    if (button == ui->buttonMode) {
-    }
-    if (button == ui->buttonEyeX) {
-    }
-    if (button == ui->buttonOpenBci) {
-    }
 }
 
 
 void MainWindow::on_ActivationEvent(int interactorId) {
 
-    if (suppressEyeEvents) return;
-
-    ClearDelays();
-    if (interactorId == -1) return;
-}
-
-
-void MainWindow::on_ActivationFocusEvent(int interactorId) {
-
-    if (suppressEyeEvents == true) return;
-
-    currentInteractor = interactorId;
-    ClearDelays();
-
-    if (interactorId == -1) {
-        ClearHover();
-    }
-
-    QPushButton *sender = qobject_cast<QPushButton*>( QWidget::find( (WId)interactorId ) );
-    if (!sender) return;
-    QString senderName = sender->objectName();
-
-    if ((senderName == IDC_BUTTON_MENU_MODE) ||
-        (senderName == IDC_BUTTON_MENU_EYEX) ||
-        (senderName == IDC_BUTTON_MENU_BCI)  ){
-
-        GazeHover( sender );
-        sender->click();
-
-    } else
-    if ((senderName == IDC_ACTIVATOR_BUTTON) ||
-        (senderName == IDC_MOUSE_BUTTON)     ||
-        (senderName == IDC_BCI_BUTTON)       ||
-        (senderName == IDC_BUTTON_MODE_READ) ||
-        (senderName == IDC_BUTTON_MODE_QT)   ||
-        (senderName == IDC_BUTTON_MODE_PHP)  ||
-        (senderName == IDC_BUTTON_MODE_OFF)  ){
-
-        currentTimer.start( intervalActivate );
-        progressTimer.start( intervalProgress );
-
-    } else
-    if ((senderName == INTERACTOR_BACK)      ||
-        (senderName == INTERACTOR_PGUP)      ||
-        (senderName == INTERACTOR_PGDN)      ){
-
-        currentTimer.start( intervalInteractor );
-        progressTimer.start( intervalProgress );
-
-    } else if (interactorId > 0) {
-
-        GazeHover( sender );
-    }
 }
 
 
 void MainWindow::on_InteractorActivated() {
 
-    QPushButton *sender = qobject_cast<QPushButton*>( QWidget::find( (WId)currentInteractor ) );
+    EyeButton * sender = qobject_cast<EyeButton*>( QObject::sender() );
     if (!sender) return;
     QString senderName = sender->objectName();
 
@@ -366,7 +230,7 @@ void MainWindow::on_InteractorActivated() {
             input[i].ki.time = 0;
         }
         input[0].ki.wVk = VK_MENU;
-        input[0].ki.wScan = MapVirtualKey(VK_CONTROL, MAPVK_VK_TO_VSC);
+        input[0].ki.wScan = MapVirtualKey(VK_MENU, MAPVK_VK_TO_VSC);
         input[1].ki.wVk = VK_LEFT;
         input[1].ki.wScan = MapVirtualKey(VK_LEFT, MAPVK_VK_TO_VSC);
         input[2].ki.dwFlags = KEYEVENTF_KEYUP;
@@ -398,6 +262,68 @@ void MainWindow::on_InteractorActivated() {
         SendInput(1, &ip, sizeof(INPUT));
         ip.ki.dwFlags = KEYEVENTF_KEYUP;
         SendInput(1, &ip, sizeof(INPUT));
+
+    }
+    if (senderName == INTERACTOR_NEWTAB) {
+
+        // send CTRL + (T, TAB, F4)
+
+        int key_count = 8;
+        INPUT * input = new INPUT[ key_count ];
+        for (int i = 0; i < key_count; i++) {
+            input[i].ki.dwFlags = 0;
+            input[i].type = INPUT_KEYBOARD;
+            input[i].ki.time = 0;
+        }
+        input[0].ki.wVk = VK_CONTROL;
+        input[0].ki.wScan = MapVirtualKey(VK_CONTROL, MAPVK_VK_TO_VSC);
+
+        input[1].ki.wVk = 0x54;
+        input[1].ki.wScan = MapVirtualKey(0x54, MAPVK_VK_TO_VSC);
+        input[2].ki.dwFlags = KEYEVENTF_KEYUP;
+        input[2].ki.wVk = input[1].ki.wVk;
+        input[2].ki.wScan = input[1].ki.wScan;
+
+        input[3].ki.wVk = VK_TAB;
+        input[3].ki.wScan = MapVirtualKey(VK_TAB, MAPVK_VK_TO_VSC);
+        input[4].ki.dwFlags = KEYEVENTF_KEYUP;
+        input[4].ki.wVk = input[3].ki.wVk;
+        input[4].ki.wScan = input[3].ki.wScan;
+
+        input[5].ki.wVk = VK_F4;
+        input[5].ki.wScan = MapVirtualKey(VK_F4, MAPVK_VK_TO_VSC);
+        input[6].ki.dwFlags = KEYEVENTF_KEYUP;
+        input[6].ki.wVk = input[5].ki.wVk;
+        input[6].ki.wScan = input[5].ki.wScan;
+
+        input[7].ki.dwFlags = KEYEVENTF_KEYUP;
+        input[7].ki.wVk = input[0].ki.wVk;
+        input[7].ki.wScan = input[0].ki.wScan;
+        SendInput(key_count, (LPINPUT)input, sizeof(INPUT));
+
+    }
+    if (senderName == INTERACTOR_CLSTAB) {
+
+        // send CTRL + F4
+
+        int key_count = 4;
+        INPUT * input = new INPUT[ key_count ];
+        for (int i = 0; i < key_count; i++) {
+            input[i].ki.dwFlags = 0;
+            input[i].type = INPUT_KEYBOARD;
+            input[i].ki.time = 0;
+        }
+        input[0].ki.wVk = VK_CONTROL;
+        input[0].ki.wScan = MapVirtualKey(VK_CONTROL, MAPVK_VK_TO_VSC);
+        input[1].ki.wVk = VK_F4;
+        input[1].ki.wScan = MapVirtualKey(VK_F4, MAPVK_VK_TO_VSC);
+        input[2].ki.dwFlags = KEYEVENTF_KEYUP;
+        input[2].ki.wVk = input[0].ki.wVk;
+        input[2].ki.wScan = input[0].ki.wScan;
+        input[3].ki.dwFlags = KEYEVENTF_KEYUP;
+        input[3].ki.wVk = input[1].ki.wVk;
+        input[3].ki.wScan = input[1].ki.wScan;
+        SendInput(key_count, (LPINPUT)input, sizeof(INPUT));
     }
 
 }
@@ -414,69 +340,6 @@ void MainWindow::on_ThoughtActivated() {
         SendInput(1, &im, sizeof(INPUT));
         im.mi.dwFlags = MOUSEEVENTF_LEFTUP;
         SendInput(1, &im, sizeof(INPUT));
-    }
-}
-
-
-void MainWindow::on_Timer() {
-
-    ClearDelays();
-
-    QPushButton *sender = qobject_cast<QPushButton*>( QWidget::find( (WId)currentInteractor ) );
-    if (!sender) return;
-    QString senderName = sender->objectName();
-
-    if (senderName == IDC_MOUSE_BUTTON) {
-
-        ToggleMouse();
-    }
-    if (senderName == IDC_ACTIVATOR_BUTTON) {
-
-        ToggleMenu();
-    }
-    if (senderName == IDC_BCI_BUTTON) {
-
-        ToggleBrain();
-    }
-    if (senderName == IDC_BUTTON_MODE_OFF) {
-
-        ui->buttonModeOff->click();
-    }
-    if (senderName == IDC_BUTTON_MODE_READ) {
-
-        ui->buttonModeRead->click();
-    }
-    if ((senderName == INTERACTOR_BACK) ||
-        (senderName == INTERACTOR_PGUP) ||
-        (senderName == INTERACTOR_PGDN) ){
-
-        on_InteractorActivated();
-    }
-}
-
-
-void MainWindow::on_Progress() {
-
-    QPushButton *sender = qobject_cast<QPushButton*>( QWidget::find( (WId)currentInteractor ) );
-    if (!sender) return;
-    QString senderName = sender->objectName();
-
-    progressCounter = progressCounter + 0.05;
-    if (progressCounter > 1) progressCounter = 1;
-    QString css = "background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop: 0 #00fc00, stop: " + QString::number(progressCounter) + " #fcfcfc);";
-
-    if ((senderName == IDC_MOUSE_BUTTON)        ||
-        (senderName == IDC_ACTIVATOR_BUTTON)    ||
-        (senderName == IDC_BCI_BUTTON)          ||
-        (senderName == IDC_BUTTON_MODE_OFF)     ||
-        (senderName == IDC_BUTTON_MODE_READ)    ){
-
-        sender->setStyleSheet( css );
-    }
-    if ((senderName == INTERACTOR_BACK)         ||
-        (senderName == INTERACTOR_PGUP)         ||
-        (senderName == INTERACTOR_PGDN)         ){
-
     }
 }
 
@@ -565,29 +428,6 @@ void MainWindow::SlideMenu(int position) {
 }
 
 
-void MainWindow::GazeHover(QPushButton * button) {
-
-    ClearHover();
-    if (button) button->setStyleSheet("border: 3px solid #29B6F6; background: #D6EAF8;");
-}
-
-
-void MainWindow::ClearHover() {
-
-    ui->buttonMouse->setStyleSheet("");
-    ui->buttonMain->setStyleSheet("");
-    ui->buttonBCI->setStyleSheet("");
-    ui->buttonOpenBci->setStyleSheet("");
-    ui->buttonEyeX->setStyleSheet("");
-    ui->buttonMode->setStyleSheet("");
-    ui->buttonModeRead->setStyleSheet("");
-    ui->buttonModeQt->setStyleSheet("");
-    ui->buttonModePhp->setStyleSheet("");
-    ui->buttonModeOff->setStyleSheet("");
-}
-
-
-
 void MainWindow::ShowMenu(bool visible) {
 
     if (visible == false) {
@@ -596,10 +436,6 @@ void MainWindow::ShowMenu(bool visible) {
         ShowDialogEye( visible );
         ShowDialogBrain( visible );
     }
-
-    ui->buttonMode->setStyleSheet("");
-    ui->buttonEyeX->setStyleSheet("");
-    ui->buttonOpenBci->setStyleSheet("");
 
     ui->buttonMode->setVisible( visible );
     ui->buttonEyeX->setVisible( visible );
@@ -621,11 +457,6 @@ void MainWindow::ShowDialogMode(bool visible) {
         ShowDialogEye(false);
         ShowDialogBrain(false);
     }
-
-    ui->buttonModeRead->setStyleSheet("");
-    ui->buttonModeQt->setStyleSheet("");
-    ui->buttonModePhp->setStyleSheet("");
-    ui->buttonModeOff->setStyleSheet("");
 
     ui->labelMode->setVisible( visible );
     ui->buttonModeRead->setVisible( visible );
@@ -649,11 +480,6 @@ void MainWindow::ShowDialogEye(bool visible) {
         ShowDialogBrain(false);
     }
 
-    ui->buttonEye1->setStyleSheet("");
-    ui->buttonEye2->setStyleSheet("");
-    ui->buttonEye3->setStyleSheet("");
-    ui->buttonEye4->setStyleSheet("");
-
     ui->labelEye->setVisible( visible );
     ui->buttonEye1->setVisible( visible );
     ui->buttonEye2->setVisible( visible );
@@ -675,11 +501,6 @@ void MainWindow::ShowDialogBrain(bool visible) {
         ShowDialogMode(false);
         ShowDialogEye(false);
     }
-
-    ui->buttonBci1->setStyleSheet("");
-    ui->buttonBci2->setStyleSheet("");
-    ui->buttonBci3->setStyleSheet("");
-    ui->buttonBci4->setStyleSheet("");
 
     ui->labelBci->setVisible( visible );
     ui->buttonBci1->setVisible( visible );
@@ -728,22 +549,22 @@ void MainWindow::on_buttonMode_clicked() {
     ShowDialogMode( true );
 
     SlideMenu(1);
-
-    SuppressEyeEvents(intervalDebounce);
 }
 
 
 void MainWindow::on_buttonModeOff_clicked() {
 
     ClearInteractorProfile();
-    ToggleMenu();
+    ShowMenu(false);
 }
 
 
 void MainWindow::on_buttonModeRead_clicked() {
 
+
+    ClearInteractorProfile();
     SetInteractorProfile();
-    ToggleMenu();
+    ShowMenu(false);
 }
 
 
@@ -754,8 +575,6 @@ void MainWindow::on_buttonEyeX_clicked() {
     ShowDialogEye( true );
 
     SlideMenu(2);
-
-    SuppressEyeEvents(intervalDebounce);
 }
 
 
@@ -766,8 +585,6 @@ void MainWindow::on_buttonOpenBci_clicked() {
     ShowDialogBrain( true );
 
     SlideMenu(3);
-
-    SuppressEyeEvents(intervalDebounce);
 }
 
 

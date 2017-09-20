@@ -42,13 +42,15 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     eyexhost.cpp \
-    bcihost.cpp
+    bcihost.cpp \
+    eyebutton.cpp
 
 HEADERS += \
         mainwindow.h \
     eyex/EyeX.h \
     eyexhost.h \
-    bcihost.h
+    bcihost.h \
+    eyebutton.h
 
 FORMS += \
         mainwindow.ui

@@ -391,11 +391,11 @@ void EyeXHost::OnActivationFocusChanged(TX_HANDLE hBehavior, int interactorId) {
 
         if (eventData.HasTentativeActivationFocus) {
 
-            emit ActivationFocusEvent(interactorId);
+            emit ActivationFocusEvent( interactorId );
 
         } else {
 
-            emit ActivationFocusEvent(-1);
+            emit ActivationFocusEvent( -1 );
         }
     }
 }
@@ -403,7 +403,7 @@ void EyeXHost::OnActivationFocusChanged(TX_HANDLE hBehavior, int interactorId) {
 
 void EyeXHost::OnActivated(TX_HANDLE hBehavior, int interactorId) {
 
-    emit ActivationEvent(interactorId);
+    emit ActivationEvent( interactorId );
 }
 
 

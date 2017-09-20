@@ -46,14 +46,14 @@ QPushButton:hover{
         <rect>
          <x>10</x>
          <y>10</y>
-         <width>1138</width>
+         <width>1021</width>
          <height>577</height>
         </rect>
        </property>
        <property name="styleSheet">
         <string notr="true"/>
        </property>
-       <widget class="QPushButton" name="buttonOpenBci">
+       <widget class="EyeButton" name="buttonOpenBci">
         <property name="enabled">
          <bool>true</bool>
         </property>
@@ -66,13 +66,13 @@ QPushButton:hover{
          </rect>
         </property>
         <property name="mouseTracking">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="autoFillBackground">
          <bool>false</bool>
         </property>
         <property name="styleSheet">
-         <string notr="true">font-weight:bold;</string>
+         <string notr="true">background:rgba(0,0,0,0.2);border:1px solid rgba(0,0,0,0.3)</string>
         </property>
         <property name="text">
          <string>OpenBci</string>
@@ -81,7 +81,7 @@ QPushButton:hover{
          <bool>false</bool>
         </property>
        </widget>
-       <widget class="QPushButton" name="buttonModeQt">
+       <widget class="EyeButton" name="buttonModeQt">
         <property name="geometry">
          <rect>
           <x>320</x>
@@ -91,13 +91,13 @@ QPushButton:hover{
          </rect>
         </property>
         <property name="styleSheet">
-         <string notr="true">font-weight:bold;</string>
+         <string notr="true">background:rgba(0,0,0,0.2);border:1px solid rgba(0,0,0,0.3)</string>
         </property>
         <property name="text">
          <string>Qt IDE</string>
         </property>
        </widget>
-       <widget class="QPushButton" name="buttonEye3">
+       <widget class="EyeButton" name="buttonEye3">
         <property name="geometry">
          <rect>
           <x>750</x>
@@ -107,13 +107,13 @@ QPushButton:hover{
          </rect>
         </property>
         <property name="styleSheet">
-         <string notr="true">font-weight:bold;</string>
+         <string notr="true">background:rgba(0,0,0,0.2);border:1px solid rgba(0,0,0,0.3)</string>
         </property>
         <property name="text">
          <string/>
         </property>
        </widget>
-       <widget class="QPushButton" name="buttonModePhp">
+       <widget class="EyeButton" name="buttonModePhp">
         <property name="geometry">
          <rect>
           <x>750</x>
@@ -123,13 +123,13 @@ QPushButton:hover{
          </rect>
         </property>
         <property name="styleSheet">
-         <string notr="true">font-weight:bold;</string>
+         <string notr="true">background:rgba(0,0,0,0.2);border:1px solid rgba(0,0,0,0.3)</string>
         </property>
         <property name="text">
          <string>PHP IDE</string>
         </property>
        </widget>
-       <widget class="QPushButton" name="buttonBci4">
+       <widget class="EyeButton" name="buttonBci4">
         <property name="geometry">
          <rect>
           <x>630</x>
@@ -139,7 +139,7 @@ QPushButton:hover{
          </rect>
         </property>
         <property name="styleSheet">
-         <string notr="true">font-weight:bold;</string>
+         <string notr="true">background:rgba(0,0,0,0.2);border:1px solid rgba(0,0,0,0.3)</string>
         </property>
         <property name="text">
          <string/>
@@ -201,7 +201,7 @@ QPushButton:hover{
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
-       <widget class="QPushButton" name="buttonModeOff">
+       <widget class="EyeButton" name="buttonModeOff">
         <property name="geometry">
          <rect>
           <x>630</x>
@@ -211,13 +211,13 @@ QPushButton:hover{
          </rect>
         </property>
         <property name="styleSheet">
-         <string notr="true">font-weight:bold;</string>
+         <string notr="true">background:rgba(0,0,0,0.2);border:1px solid rgba(0,0,0,0.3)</string>
         </property>
         <property name="text">
          <string>Off</string>
         </property>
        </widget>
-       <widget class="QPushButton" name="buttonEyeX">
+       <widget class="EyeButton" name="buttonEyeX">
         <property name="geometry">
          <rect>
           <x>310</x>
@@ -227,7 +227,7 @@ QPushButton:hover{
          </rect>
         </property>
         <property name="styleSheet">
-         <string notr="true">font-weight:bold;</string>
+         <string notr="true">background:rgba(0,0,0,0.2);border:1px solid rgba(0,0,0,0.3)</string>
         </property>
         <property name="text">
          <string>EyeX</string>
@@ -236,7 +236,7 @@ QPushButton:hover{
          <bool>false</bool>
         </property>
        </widget>
-       <widget class="QPushButton" name="buttonMouse">
+       <widget class="EyeButton" name="buttonMouse">
         <property name="geometry">
          <rect>
           <x>430</x>
@@ -244,6 +244,9 @@ QPushButton:hover{
           <width>51</width>
           <height>26</height>
          </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">background:rgba(0,0,0,0.2);border:1px solid rgba(0,0,0,0.3)</string>
         </property>
         <property name="text">
          <string>Mouse</string>
@@ -278,7 +281,7 @@ QPushButton:hover{
          <string>OpenBCI Settings</string>
         </property>
        </widget>
-       <widget class="QPushButton" name="buttonBci2">
+       <widget class="EyeButton" name="buttonBci2">
         <property name="geometry">
          <rect>
           <x>320</x>
@@ -288,7 +291,7 @@ QPushButton:hover{
          </rect>
         </property>
         <property name="styleSheet">
-         <string notr="true">font-weight:bold;</string>
+         <string notr="true">background:rgba(0,0,0,0.2);border:1px solid rgba(0,0,0,0.3)</string>
         </property>
         <property name="text">
          <string/>
@@ -317,7 +320,7 @@ QPushButton:hover{
          <string>Tobii EyeX Settings</string>
         </property>
        </widget>
-       <widget class="QPushButton" name="buttonBci3">
+       <widget class="EyeButton" name="buttonBci3">
         <property name="geometry">
          <rect>
           <x>750</x>
@@ -327,13 +330,13 @@ QPushButton:hover{
          </rect>
         </property>
         <property name="styleSheet">
-         <string notr="true">font-weight:bold;</string>
+         <string notr="true">background:rgba(0,0,0,0.2);border:1px solid rgba(0,0,0,0.3)</string>
         </property>
         <property name="text">
          <string/>
         </property>
        </widget>
-       <widget class="QPushButton" name="buttonMode">
+       <widget class="EyeButton" name="buttonMode">
         <property name="geometry">
          <rect>
           <x>530</x>
@@ -343,7 +346,7 @@ QPushButton:hover{
          </rect>
         </property>
         <property name="styleSheet">
-         <string notr="true">font-weight:bold;</string>
+         <string notr="true">background:rgba(0,0,0,0.2);border:1px solid rgba(0,0,0,0.3)</string>
         </property>
         <property name="text">
          <string>Mode</string>
@@ -352,7 +355,7 @@ QPushButton:hover{
          <bool>false</bool>
         </property>
        </widget>
-       <widget class="QPushButton" name="buttonModeRead">
+       <widget class="EyeButton" name="buttonModeRead">
         <property name="geometry">
          <rect>
           <x>440</x>
@@ -362,13 +365,13 @@ QPushButton:hover{
          </rect>
         </property>
         <property name="styleSheet">
-         <string notr="true">font-weight:bold;</string>
+         <string notr="true">background:rgba(0,0,0,0.2);border:1px solid rgba(0,0,0,0.3)</string>
         </property>
         <property name="text">
          <string>Reading</string>
         </property>
        </widget>
-       <widget class="QPushButton" name="buttonEye2">
+       <widget class="EyeButton" name="buttonEye2">
         <property name="geometry">
          <rect>
           <x>320</x>
@@ -378,13 +381,13 @@ QPushButton:hover{
          </rect>
         </property>
         <property name="styleSheet">
-         <string notr="true">font-weight:bold;</string>
+         <string notr="true">background:rgba(0,0,0,0.2);border:1px solid rgba(0,0,0,0.3)</string>
         </property>
         <property name="text">
          <string/>
         </property>
        </widget>
-       <widget class="QPushButton" name="buttonEye4">
+       <widget class="EyeButton" name="buttonEye4">
         <property name="geometry">
          <rect>
           <x>630</x>
@@ -394,13 +397,13 @@ QPushButton:hover{
          </rect>
         </property>
         <property name="styleSheet">
-         <string notr="true">font-weight:bold;</string>
+         <string notr="true">background:rgba(0,0,0,0.2);border:1px solid rgba(0,0,0,0.3)</string>
         </property>
         <property name="text">
          <string/>
         </property>
        </widget>
-       <widget class="QPushButton" name="buttonEye1">
+       <widget class="EyeButton" name="buttonEye1">
         <property name="geometry">
          <rect>
           <x>440</x>
@@ -410,7 +413,7 @@ QPushButton:hover{
          </rect>
         </property>
         <property name="styleSheet">
-         <string notr="true">font-weight:bold;</string>
+         <string notr="true">background:rgba(0,0,0,0.2);border:1px solid rgba(0,0,0,0.3)</string>
         </property>
         <property name="text">
          <string/>
@@ -444,7 +447,7 @@ QPushButton:hover{
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
-       <widget class="QPushButton" name="buttonMain">
+       <widget class="EyeButton" name="buttonMain">
         <property name="geometry">
          <rect>
           <x>550</x>
@@ -452,6 +455,9 @@ QPushButton:hover{
           <width>51</width>
           <height>26</height>
          </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">background:rgba(0,0,0,0.2);border:1px solid rgba(0,0,0,0.3)</string>
         </property>
         <property name="text">
          <string>...</string>
@@ -466,7 +472,7 @@ QPushButton:hover{
          <bool>false</bool>
         </property>
        </widget>
-       <widget class="QPushButton" name="buttonBci1">
+       <widget class="EyeButton" name="buttonBci1">
         <property name="geometry">
          <rect>
           <x>440</x>
@@ -476,7 +482,7 @@ QPushButton:hover{
          </rect>
         </property>
         <property name="styleSheet">
-         <string notr="true">font-weight:bold;</string>
+         <string notr="true">background:rgba(0,0,0,0.2);border:1px solid rgba(0,0,0,0.3)</string>
         </property>
         <property name="text">
          <string/>
@@ -533,7 +539,7 @@ QPushButton:hover{
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
-       <widget class="QPushButton" name="buttonBCI">
+       <widget class="EyeButton" name="buttonBCI">
         <property name="geometry">
          <rect>
           <x>490</x>
@@ -541,6 +547,9 @@ QPushButton:hover{
           <width>51</width>
           <height>26</height>
          </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">background:rgba(0,0,0,0.2);border:1px solid rgba(0,0,0,0.3)</string>
         </property>
         <property name="text">
          <string>BCI</string>
@@ -559,6 +568,13 @@ QPushButton:hover{
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>EyeButton</class>
+   <extends>QPushButton</extends>
+   <header location="global">eyebutton.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

@@ -13,6 +13,7 @@
 #include <QMessageBox>
 #include <windows.h>
 #include "eyexhost.h"
+#include "eyebutton.h"
 #include "bcihost.h"
 
 
@@ -50,6 +51,8 @@
 #define INTERACTOR_BACK         "interactor_BACK"
 #define INTERACTOR_PGUP         "interactor_PGUP"
 #define INTERACTOR_PGDN         "interactor_PGDN"
+#define INTERACTOR_NEWTAB       "interactor_NEWTAB"
+#define INTERACTOR_CLSTAB       "interactor_CLSTAB"
 
 
 namespace Ui {
@@ -59,21 +62,21 @@ class MainWindow;
 
 class InteractorParam {
 public:
-    int         x;
-    int         y;
-    int         width;
-    int         height;
-    QString     name;
-    QString     keypress;
+    int             x;
+    int             y;
+    int             width;
+    int             height;
+    QString         name;
+    ActivatorFlags  flags;
 
-    InteractorParam(int px, int py, int pwidth, int pheight, QString pname, QString pkeypress) {
+    InteractorParam(int px, int py, int pwidth, int pheight, QString pname, ActivatorFlags pflags) {
 
-        x       = px;
-        y       = py;
-        width   = pwidth;
-        height  = pheight;
-        name    = pname;
-        keypress= pkeypress;
+        x           = px;
+        y           = py;
+        width       = pwidth;
+        height      = pheight;
+        name        = pname;
+        flags       = pflags;
     }
 };
 
@@ -87,7 +90,6 @@ public:
 
     explicit    MainWindow(QWidget *parent = 0);
                 ~MainWindow();
-    bool        eventFilter(QObject *obj, QEvent *event);
 
     EyeXHost    eyes;
     BciHost     brain;
@@ -99,16 +101,7 @@ private:
 
     Ui::MainWindow  *ui;
 
-    QTimer      progressTimer;
-    QTimer      currentTimer;
     QTimer      suppressTimer;
-    int         currentInteractor   = -1;
-    int         intervalActivate    = 800;
-    int         intervalInteractor  = 1200;
-    int         intervalProgress    = 40;
-    int         intervalDebounce    = 600;
-    float       progressCounter     = 0.0;
-
     bool        suppressEyeEvents   = false;
 
     void        InitializeUi();
@@ -116,19 +109,15 @@ private:
     void        SetInteractorProfile();
     void        ClearInteractorProfile();
     void        AddInteractor( InteractorParam data );
-    RECT        GetScreenBounds(QPushButton * button);
+    RECT        GetScreenBounds(EyeButton * button);
     void        UpdateActivatableRegions();
 
-    void        ClearDelays();
     void        SuppressEyeEvents( int msec );
 
     void        ToggleMouse();
     void        ToggleBrain();
     void        ToggleMenu();
     void        SlideMenu( int position );
-
-    void        GazeHover(QPushButton * button);
-    void        ClearHover();
 
     void        ShowMenu(bool visible);
     void        ShowDialogMode(bool visible);
@@ -143,24 +132,14 @@ private:
 
 signals:
 
-    void        ButtonEnterEvent(QPushButton * button);
-    void        ButtonLeaveEvent(QPushButton * button);
-
-
 public slots:
 
-    void        on_ActivationEvent(int interactorId);
-    void        on_ActivationFocusEvent(int interactorId);
+    void        on_ActivationEvent( int interactorId );
 
 
 private slots:
 
-    void        on_Progress();
-    void        on_Timer();
     void        on_Suppress();
-
-    void        on_ButtonEnterEvent(QPushButton * button);
-    void        on_ButtonLeaveEvent(QPushButton * button);
 
     void        on_InteractorActivated();
     void        on_ThoughtActivated();
@@ -171,8 +150,8 @@ private slots:
     void        on_buttonOpenBci_clicked();
     void        on_buttonEyeX_clicked();
     void        on_buttonMode_clicked();
-    void on_buttonModeOff_clicked();
-    void on_buttonModeRead_clicked();
+    void        on_buttonModeOff_clicked();
+    void        on_buttonModeRead_clicked();
 };
 
 #endif // MAINWINDOW_H
