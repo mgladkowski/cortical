@@ -19,10 +19,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     eyes.Init( (HWND)this->winId() );
 
+    SetInteractorProfile();
+
     InitializeUi();
 
     ShowMenu( false );
-
 }
 
 
@@ -43,9 +44,9 @@ void MainWindow::InitializeUi() {
     this->showFullScreen();
 
     ui->frameScreen->move( 0,0 );
-    ui->frameScreen->resize( this->width(), this->height() );
+    ui->frameScreen->resize( desktopRect.width(), desktopRect.height() );
 
-    int main_X = static_cast<int>( desktopRect.left() + (desktopRect.width() * 0.65) - 350 );
+    int main_X = static_cast<int>( desktopRect.left() + (desktopRect.width() * 0.65) - 400 );
     int main_Y = static_cast<int>( desktopRect.bottom()- ui->widgetMain->height() );
 
     ui->widgetMain->move( main_X, main_Y) ;
@@ -57,7 +58,6 @@ void MainWindow::InitializeUi() {
     foreach(EyeButton *b, list) {
 
         if (b->isInteractor == false) {
-
             QObject::connect(
                         &eyes, SIGNAL(ActivationEvent(int)),
                         b, SLOT(on_ActivationEvent(int))
@@ -123,18 +123,6 @@ void MainWindow::UpdateActivatableRegions() {
 }
 
 
-void MainWindow::SetInteractorProfile() {
-
-    AddInteractor( InteractorParam(  900,   50,   200,  50, INTERACTOR_PGUP, ActivatorFlags::ACTIVATE_NORMAL | ActivatorFlags::INTERACTOR_DEFAULT) );
-    AddInteractor( InteractorParam(  900, 1000,   200,  50, INTERACTOR_PGDN, ActivatorFlags::ACTIVATE_NORMAL | ActivatorFlags::INTERACTOR_DEFAULT) );
-    AddInteractor( InteractorParam( 1750,  700,    50,  50, INTERACTOR_BACK, ActivatorFlags::ACTIVATE_NORMAL | ActivatorFlags::INTERACTOR_DEFAULT) );
-    AddInteractor( InteractorParam( 1750,  800,    50,  50, INTERACTOR_NEWTAB, ActivatorFlags::ACTIVATE_NORMAL | ActivatorFlags::INTERACTOR_DEFAULT) );
-    AddInteractor( InteractorParam( 1750,  900,    50,  50, INTERACTOR_CLSTAB, ActivatorFlags::ACTIVATE_SLOW | ActivatorFlags::INTERACTOR_DANGER) );
-
-    UpdateActivatableRegions();
-}
-
-
 void MainWindow::AddInteractor( InteractorParam data ) {
 
     EyeButton *button = new EyeButton(ui->frameScreen);
@@ -160,6 +148,18 @@ void MainWindow::AddInteractor( InteractorParam data ) {
     button->setFocusPolicy(Qt::NoFocus);
 
     this->layout()->addWidget( button );
+}
+
+
+void MainWindow::SetInteractorProfile() {
+
+    AddInteractor( InteractorParam(  900,   50,   200,  50, INTERACTOR_PGUP, ActivatorFlags::ACTIVATE_NORMAL | ActivatorFlags::INTERACTOR_DEFAULT) );
+    AddInteractor( InteractorParam(  900, 1000,   200,  50, INTERACTOR_PGDN, ActivatorFlags::ACTIVATE_NORMAL | ActivatorFlags::INTERACTOR_DEFAULT) );
+    AddInteractor( InteractorParam( 1750,  700,    50,  50, INTERACTOR_BACK, ActivatorFlags::ACTIVATE_SLOW | ActivatorFlags::INTERACTOR_DEFAULT) );
+    AddInteractor( InteractorParam( 1750,  800,    50,  50, INTERACTOR_NEWTAB, ActivatorFlags::ACTIVATE_SLOW | ActivatorFlags::INTERACTOR_DEFAULT) );
+    AddInteractor( InteractorParam( 1750,  900,    50,  50, INTERACTOR_CLSTAB, ActivatorFlags::ACTIVATE_SLOW | ActivatorFlags::INTERACTOR_DANGER) );
+
+    UpdateActivatableRegions();
 }
 
 
@@ -358,6 +358,7 @@ void MainWindow::SuppressEyeEvents( int msec ) {
 }
 
 
+
 void MainWindow::ToggleMouse() {
 
     eyes.mouse = (eyes.mouse == EyeXHost::Mouse::Off)
@@ -447,6 +448,8 @@ void MainWindow::ShowMenu(bool visible) {
     ui->line23->setVisible( visible );
 
     if (visible == true) SlideMenu(1);
+
+    UpdateActivatableRegions();
 }
 
 

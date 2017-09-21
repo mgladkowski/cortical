@@ -195,15 +195,15 @@ void EyeButton::stopTimers() {
 void EyeButton::setActivationType( ActivatorFlags flags ) {
 
     if (flags & ActivatorFlags::ACTIVATE_QUICK) {
-        msecActivate = 500;
-        msecRecovery = 500;
+        msecActivate = 300;
+        msecRecovery = 300;
     }
     if (flags & ActivatorFlags::ACTIVATE_NORMAL) {
         msecActivate = 1200;
         msecRecovery = 500;
     }
     if (flags & ActivatorFlags::ACTIVATE_SLOW) {
-        msecActivate = 2000;
+        msecActivate = 3000;
         msecRecovery = 500;
     }
     if (flags & ActivatorFlags::ACTIVATE_INSTANT) {
@@ -221,11 +221,11 @@ void EyeButton::setActivationType( ActivatorFlags flags ) {
         defaultBackground   = "background:rgba(0,0,0,0.1);";
         defaultBorder       = "border:1px solid rgba(0,0,0,0);";
         fixateBorder        = "border:0px solid rgba(0,0,0,0);";
-        fixateBackground    = "background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop: 0 rgba(0,255,0,0.1), stop: %1 rgba(0,0,0,0.1) );";
+        fixateBackground    = "background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop: 0 rgba(41,182,246,0.1), stop: %1 rgba(0,0,0,0.1) );";
         hoverBorder         = "border:0px solid rgba(0,0,0,0);";
-        hoverBackground     = "background:rgba(0,0,0,0.1);";
+        hoverBackground     = "background:rgba(41,182,246,0.1);";
         activeBackground    = "background:rgba(129,212,250,0.1);";
-        activeBorder        = "border:3px solid rgba(41,182,246,0);";
+        activeBorder        = "border:3px solid rgba(41,182,246,0.1);";
     }
     if (flags & ActivatorFlags::INTERACTOR_DANGER) {
 
@@ -234,12 +234,12 @@ void EyeButton::setActivationType( ActivatorFlags flags ) {
         showEyeHover        = true;
         defaultBackground   = "background:rgba(0,0,0,0.1);";
         defaultBorder       = "border:1px solid rgba(0,0,0,0);";
-        fixateBorder        = "border:1px solid rgba(255,0,0,0.4);";
-        fixateBackground    = "background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop: 0 rgba(255,0,0,0.4), stop: %1 rgba(0,0,0,0.1) );";
+        fixateBorder        = "border:1px solid rgba(255,0,0,0.2);";
+        fixateBackground    = "background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop: 0 rgba(255,0,0,0.2), stop: %1 rgba(0,0,0,0.1) );";
         hoverBorder         = "border:3px solid rgba(255,0,0,0.4);";
-        hoverBackground     = "background:rgba(0,0,0,0.2);";
+        hoverBackground     = "background:rgba(41,182,246,0.1);";
         activeBackground    = "background:rgba(129,212,250,0.1);";
-        activeBorder        = "border:3px solid rgba(41,182,246,0);";
+        activeBorder        = "border:3px solid rgba(41,182,246,0.1);";
     }
 }
 

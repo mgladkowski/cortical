@@ -106,13 +106,13 @@ private:
 
     void        InitializeUi();
 
+    void        AddInteractor( InteractorParam data );
     void        SetInteractorProfile();
     void        ClearInteractorProfile();
-    void        AddInteractor( InteractorParam data );
-    RECT        GetScreenBounds(EyeButton * button);
-    void        UpdateActivatableRegions();
-
     void        SuppressEyeEvents( int msec );
+
+    RECT        GetScreenBounds( EyeButton * button );
+    void        UpdateActivatableRegions();
 
     void        ToggleMouse();
     void        ToggleBrain();

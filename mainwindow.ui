@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1176</width>
-    <height>615</height>
+    <height>576</height>
    </rect>
   </property>
   <property name="mouseTracking">
@@ -47,7 +47,7 @@ QPushButton:hover{
          <x>10</x>
          <y>10</y>
          <width>1021</width>
-         <height>577</height>
+         <height>551</height>
         </rect>
        </property>
        <property name="styleSheet">
@@ -75,7 +75,17 @@ QPushButton:hover{
          <string notr="true">background:rgba(0,0,0,0.2);border:1px solid rgba(0,0,0,0.3)</string>
         </property>
         <property name="text">
-         <string>OpenBci</string>
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/dev/glyphicons-594-voice@2x.png</normaloff>:/dev/glyphicons-594-voice@2x.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>32</width>
+          <height>32</height>
+         </size>
         </property>
         <property name="checkable">
          <bool>false</bool>
@@ -230,7 +240,17 @@ QPushButton:hover{
          <string notr="true">background:rgba(0,0,0,0.2);border:1px solid rgba(0,0,0,0.3)</string>
         </property>
         <property name="text">
-         <string>EyeX</string>
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/dev/glyphicons-52-eye-open.png</normaloff>:/dev/glyphicons-52-eye-open.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>32</width>
+          <height>32</height>
+         </size>
         </property>
         <property name="checkable">
          <bool>false</bool>
@@ -249,7 +269,11 @@ QPushButton:hover{
          <string notr="true">background:rgba(0,0,0,0.2);border:1px solid rgba(0,0,0,0.3)</string>
         </property>
         <property name="text">
-         <string>Mouse</string>
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/dev/glyphicons-722-mouse.png</normaloff>:/dev/glyphicons-722-mouse.png</iconset>
         </property>
         <property name="checkable">
          <bool>false</bool>
@@ -349,7 +373,17 @@ QPushButton:hover{
          <string notr="true">background:rgba(0,0,0,0.2);border:1px solid rgba(0,0,0,0.3)</string>
         </property>
         <property name="text">
-         <string>Mode</string>
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/dev/glyphicons-154-unchecked.png</normaloff>:/dev/glyphicons-154-unchecked.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>32</width>
+          <height>32</height>
+         </size>
         </property>
         <property name="checkable">
          <bool>false</bool>
@@ -460,7 +494,11 @@ QPushButton:hover{
          <string notr="true">background:rgba(0,0,0,0.2);border:1px solid rgba(0,0,0,0.3)</string>
         </property>
         <property name="text">
-         <string>...</string>
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/dev/glyphicons-601-chevron-up.png</normaloff>:/dev/glyphicons-601-chevron-up.png</iconset>
         </property>
         <property name="checkable">
          <bool>false</bool>
@@ -552,7 +590,11 @@ QPushButton:hover{
          <string notr="true">background:rgba(0,0,0,0.2);border:1px solid rgba(0,0,0,0.3)</string>
         </property>
         <property name="text">
-         <string>BCI</string>
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/dev/glyphicons-154-unchecked.png</normaloff>:/dev/glyphicons-154-unchecked.png</iconset>
         </property>
         <property name="checkable">
          <bool>false</bool>
@@ -575,6 +617,8 @@ QPushButton:hover{
    <header location="global">eyebutton.h</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="icons.qrc"/>
+ </resources>
  <connections/>
 </ui>
