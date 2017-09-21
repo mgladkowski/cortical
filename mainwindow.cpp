@@ -558,7 +558,6 @@ void MainWindow::on_buttonMode_clicked() {
 void MainWindow::on_buttonModeOff_clicked() {
 
     ClearInteractorProfile();
-    ShowMenu(false);
 }
 
 
@@ -567,7 +566,6 @@ void MainWindow::on_buttonModeRead_clicked() {
 
     ClearInteractorProfile();
     SetInteractorProfile();
-    ShowMenu(false);
 }
 
 

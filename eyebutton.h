@@ -24,6 +24,25 @@ inline ActivatorFlags operator|(ActivatorFlags a, ActivatorFlags b) {
 }
 
 
+struct ActivatorParams {
+
+    bool        showHover;
+    bool        showEyeHover;
+    bool        showProgress;
+    bool        suppressEyes;
+    bool        clickOnActivation;
+    bool        suspendOnActivation;
+    bool        toggleActivation;
+    int         msecActivate;
+    int         msecRecovery;
+    QString     defaultBackground;
+    QString     hoverBackground;
+    QString     fixateBackground;
+    QString     activeBackground;
+    QString     currentBackground;
+};
+
+
 class EyeButton : public QPushButton {
 
     Q_OBJECT
@@ -46,11 +65,17 @@ public:
     bool        suspendOnActivation;
     bool        toggleActivation;
 
+    QString     defaultBackground;
+    QString     hoverBackground;
+    QString     fixateBackground;
+    QString     activeBackground;
+    QString     currentBackground;
+
     int         msecActivate;
     int         msecRecovery;
 
     void        setActivationType( ActivatorFlags flags );
-    void        setHoverStyleSheet( QString newBg, QString newBorder );
+
 
 protected:
 
@@ -74,16 +99,6 @@ private:
     QTimer      timerProgress;
     float       progressCounter;
 
-    QString     defaultBackground;
-    QString     defaultBorder;
-    QString     hoverBackground;
-    QString     hoverBorder;
-    QString     fixateBackground;
-    QString     fixateBorder;
-    QString     activeBackground;
-    QString     activeBorder;
-    QString     currentBackground;
-    QString     currentBorder;
 
     void        UpdateStyleSheet();
     void        UpdateStyleState();

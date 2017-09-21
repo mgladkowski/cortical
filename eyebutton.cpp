@@ -21,17 +21,10 @@ EyeButton::EyeButton(QWidget *parent) : QPushButton(parent) {
     suspendOnActivation = true;
     toggleActivation    = false;
 
-    defaultBackground   = "background:rgba(0,0,0,0.2);";
-    defaultBorder       = "border:1px solid rgba(0,0,0,0.3);";
-    hoverBackground     = "background:rgba(41,182,246,0.2);";
-    hoverBorder         = "border:3px solid rgba(41,182,246,0.6);";
-    fixateBorder        = "border:3px solid rgba(41,182,246,0.6);";
-    fixateBackground    = "background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop: 0 rgba(0,255,0,0.2), stop: %1 rgba(0,0,0,0.2) );";
-    activeBackground    = "background:rgba(129,212,250,0.2);";
-    activeBorder        = "border:3px solid rgba(41,182,246,0.6);";
-
-    currentBackground   = defaultBackground;
-    currentBorder       = defaultBorder;
+    defaultBackground   = "background:rgba(0,0,0,0.2);border:1px solid rgba(0,0,0,0.3);";
+    hoverBackground     = "background:rgba(41,182,246,0.2);border:3px solid rgba(41,182,246,0.6);";
+    fixateBackground    = "background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop: 0 rgba(41,182,246,0.2), stop: %1 rgba(0,0,0,0.2) );border:3px solid rgba(41,182,246,0.6);";
+    activeBackground    = "background:rgba(129,212,250,0.2);border:3px solid rgba(41,182,246,0.6);";
 
     UpdateStyleState();
 
@@ -78,17 +71,23 @@ EyeButton::EyeButton(QWidget *parent) : QPushButton(parent) {
 
 void EyeButton::UpdateStyleSheet() {
 
-    setStyleSheet( currentBackground + currentBorder);
+    setStyleSheet( currentBackground );
     update();
 }
 
 
 void EyeButton::UpdateStyleState() {
 
-    currentBackground = (isActivated) ? activeBackground : defaultBackground;
-    currentBorder = (isActivated) ? activeBorder : defaultBorder;
-    currentBackground = (isHovered || isEyeHovered) ? hoverBackground : currentBackground;
-    currentBorder = (isHovered || isEyeHovered) ? hoverBorder : currentBorder;
+    currentBackground = defaultBackground;
+
+    currentBackground = (isActivated)
+            ? activeBackground
+            : currentBackground;
+
+    currentBackground = ((showHover && isHovered) || (showEyeHover && isEyeHovered))
+            ? hoverBackground
+            : currentBackground;
+
     UpdateStyleSheet();
 }
 
@@ -153,9 +152,7 @@ void EyeButton::on_Timer_Progress() {
     progressCounter = progressCounter + 0.05;
     if (progressCounter > 1) progressCounter = 1;
 
-    currentBorder = fixateBorder;
     currentBackground = fixateBackground.arg(QString::number( progressCounter ));
-
     UpdateStyleSheet();
 }
 
@@ -195,8 +192,8 @@ void EyeButton::stopTimers() {
 void EyeButton::setActivationType( ActivatorFlags flags ) {
 
     if (flags & ActivatorFlags::ACTIVATE_QUICK) {
-        msecActivate = 300;
-        msecRecovery = 300;
+        msecActivate = 400;
+        msecRecovery = 400;
     }
     if (flags & ActivatorFlags::ACTIVATE_NORMAL) {
         msecActivate = 1200;
@@ -218,36 +215,34 @@ void EyeButton::setActivationType( ActivatorFlags flags ) {
         isInteractor        = true;
         showHover           = false;
         showEyeHover        = true;
-        defaultBackground   = "background:rgba(0,0,0,0.1);";
-        defaultBorder       = "border:1px solid rgba(0,0,0,0);";
-        fixateBorder        = "border:0px solid rgba(0,0,0,0);";
-        fixateBackground    = "background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop: 0 rgba(41,182,246,0.1), stop: %1 rgba(0,0,0,0.1) );";
-        hoverBorder         = "border:0px solid rgba(0,0,0,0);";
-        hoverBackground     = "background:rgba(41,182,246,0.1);";
-        activeBackground    = "background:rgba(129,212,250,0.1);";
-        activeBorder        = "border:3px solid rgba(41,182,246,0.1);";
+        defaultBackground   = "background:rgba(0,0,0,0.1); border:1px solid rgba(0,0,0,0);";
+        fixateBackground    = "background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop: 0 rgba(41,182,246,0.1), stop: %1 rgba(0,0,0,0.1) ); border:0px solid rgba(0,0,0,0);";
+        hoverBackground     = "background:rgba(41,182,246,0.1); border:0px solid rgba(0,0,0,0);";
+        activeBackground    = "background:rgba(129,212,250,0.1); border:3px solid rgba(41,182,246,0.1);";
+        UpdateStyleState();
     }
     if (flags & ActivatorFlags::INTERACTOR_DANGER) {
 
         isInteractor        = true;
         showHover           = false;
         showEyeHover        = true;
-        defaultBackground   = "background:rgba(0,0,0,0.1);";
-        defaultBorder       = "border:1px solid rgba(0,0,0,0);";
-        fixateBorder        = "border:1px solid rgba(255,0,0,0.2);";
-        fixateBackground    = "background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop: 0 rgba(255,0,0,0.2), stop: %1 rgba(0,0,0,0.1) );";
-        hoverBorder         = "border:3px solid rgba(255,0,0,0.4);";
-        hoverBackground     = "background:rgba(41,182,246,0.1);";
-        activeBackground    = "background:rgba(129,212,250,0.1);";
-        activeBorder        = "border:3px solid rgba(41,182,246,0.1);";
+        defaultBackground   = "background:rgba(0,0,0,0.1); border:1px solid rgba(0,0,0,0);";
+        fixateBackground    = "background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop: 0 rgba(255,0,0,0.2), stop: %1 rgba(0,0,0,0.1) ); border:1px solid rgba(255,0,0,0.2);";
+        hoverBackground     = "background:rgba(41,182,246,0.1); border:3px solid rgba(255,0,0,0.4);";
+        activeBackground    = "background:rgba(129,212,250,0.1); border:3px solid rgba(41,182,246,0.1);";
+        UpdateStyleState();
     }
-}
+    if (flags & ActivatorFlags::INTERACTOR_DEFAULT) {
 
-
-void EyeButton::setHoverStyleSheet( QString newBg, QString newBorder ) {
-
-    hoverBackground = newBg;
-    hoverBorder     = newBorder;
+        isInteractor        = true;
+        showHover           = false;
+        showEyeHover        = true;
+        defaultBackground   = "background:rgba(0,0,0,0.1); border:1px solid rgba(0,0,0,0);";
+        fixateBackground    = "background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop: 0 rgba(41,182,246,0.1), stop: %1 rgba(0,0,0,0.1) ); border:0px solid rgba(0,0,0,0);";
+        hoverBackground     = "background:rgba(41,182,246,0.1); border:0px solid rgba(0,0,0,0);";
+        activeBackground    = "background:rgba(129,212,250,0.1); border:3px solid rgba(41,182,246,0.1);";
+        UpdateStyleState();
+    }
 }
 
 
@@ -256,10 +251,6 @@ void EyeButton::on_EnterEvent() {
 
 
 void EyeButton::on_LeaveEvent() {
-
-    currentBackground = (isActivated) ? activeBackground : defaultBackground;
-    currentBorder = (isActivated) ? activeBorder : defaultBorder;
-    UpdateStyleSheet();
 }
 
 
@@ -267,11 +258,7 @@ void EyeButton::on_MouseEnterEvent() {
 
     isHovered = true;
 
-    if (showHover) {
-        currentBackground = hoverBackground;
-        currentBorder = hoverBorder;
-        UpdateStyleSheet();
-    }
+    UpdateStyleState();
 
     if (!isEyeHovered) emit EnterEvent();
 }
@@ -281,6 +268,8 @@ void EyeButton::on_MouseLeaveEvent() {
 
     isHovered = false;
 
+    UpdateStyleState();
+
     if (!isEyeHovered) emit LeaveEvent();
 }
 
@@ -289,11 +278,7 @@ void EyeButton::on_EyeEnterEvent() {
 
     isEyeHovered = true;
 
-    if (showEyeHover) {
-        currentBackground = hoverBackground;
-        currentBorder = hoverBorder;
-        UpdateStyleSheet();
-    }
+    UpdateStyleState();
 
     if (!isHovered) emit EnterEvent();
 }
