@@ -15,15 +15,16 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     ui->setupUi(this);
 
-    // initialize HID
-
     eyes.Init( (HWND)this->winId() );
-
-    SetInteractorProfile();
 
     InitializeUi();
 
-    ShowMenu( false );
+    QObject::connect(
+                &systemTimer, SIGNAL(timeout()),
+                this, SLOT(on_SystemTimer())
+    );
+    systemTimer.start( 2000 );
+
 }
 
 
@@ -47,7 +48,7 @@ void MainWindow::InitializeUi() {
     ui->frameScreen->resize( desktopRect.width(), desktopRect.height() );
 
     int main_X = static_cast<int>( desktopRect.left() + (desktopRect.width() * 0.65) - 400 );
-    int main_Y = static_cast<int>( desktopRect.bottom()- ui->widgetMain->height() );
+    int main_Y = static_cast<int>( desktopRect.bottom() - ui->widgetMain->height() );
 
     ui->widgetMain->move( main_X, main_Y) ;
 
@@ -58,6 +59,7 @@ void MainWindow::InitializeUi() {
     foreach(EyeButton *b, list) {
 
         if (b->isInteractor == false) {
+
             QObject::connect(
                         &eyes, SIGNAL(ActivationEvent(int)),
                         b, SLOT(on_ActivationEvent(int))
@@ -76,17 +78,25 @@ void MainWindow::InitializeUi() {
     }
 
     ActivatorFlags flags = ActivatorFlags::ACTIVATE_QUICK | ActivatorFlags::HIDE_PROGRESS_BAR;
-    ui->buttonOpenBci->setActivationType( flags );
-    ui->buttonEyeX->setActivationType( flags );
-    ui->buttonMode->setActivationType( flags );
+    ui->buttonOp->setActivationType( flags );
+    ui->buttonEye->setActivationType( flags );
+    ui->buttonBci->setActivationType( flags );
 
+    // initial state
+
+    ui->frameMenu->hide();
+    ui->frameOp->hide();
+    ui->frameEye->hide();
+    ui->frameBci->hide();
+    ui->frameSlider->move(MENU_START, ui->frameSlider->y());
+
+    UpdateActivatableRegions();
 }
 
 
 /* Gets the bounds of a button in screen coordinates
- *
  */
-RECT MainWindow::GetScreenBounds(EyeButton * button) {
+RECT MainWindow::GetScreenBounds( EyeButton * button ) {
 
     HWND hButton = (HWND)button->winId();
     QSize size = button->size();
@@ -104,7 +114,6 @@ RECT MainWindow::GetScreenBounds(EyeButton * button) {
 
 
 /* Reports the buttons as activatable regions to the EyeX host
- *
  */
 void MainWindow::UpdateActivatableRegions() {
 
@@ -151,13 +160,28 @@ void MainWindow::AddInteractor( InteractorParam data ) {
 }
 
 
-void MainWindow::SetInteractorProfile() {
+void MainWindow::SetInteractorProfile( int profileId ) {
 
-    AddInteractor( InteractorParam(  900,   50,   200,  50, INTERACTOR_PGUP, ActivatorFlags::ACTIVATE_NORMAL | ActivatorFlags::INTERACTOR_DEFAULT) );
-    AddInteractor( InteractorParam(  900, 1000,   200,  50, INTERACTOR_PGDN, ActivatorFlags::ACTIVATE_NORMAL | ActivatorFlags::INTERACTOR_DEFAULT) );
-    AddInteractor( InteractorParam( 1750,  700,    50,  50, INTERACTOR_BACK, ActivatorFlags::ACTIVATE_SLOW | ActivatorFlags::INTERACTOR_DEFAULT) );
-    AddInteractor( InteractorParam( 1750,  800,    50,  50, INTERACTOR_NEWTAB, ActivatorFlags::ACTIVATE_SLOW | ActivatorFlags::INTERACTOR_DEFAULT) );
-    AddInteractor( InteractorParam( 1750,  900,    50,  50, INTERACTOR_CLSTAB, ActivatorFlags::ACTIVATE_SLOW | ActivatorFlags::INTERACTOR_DANGER) );
+    ClearInteractorProfile();
+
+    switch (profileId) {
+    case 1:
+        AddInteractor( InteractorParam(  900,   50,   200,  50, INTERACTOR_PGUP, ActivatorFlags::ACTIVATE_NORMAL | ActivatorFlags::INTERACTOR_INVISIBLE ) );
+        AddInteractor( InteractorParam(  900, 1000,   200,  50, INTERACTOR_PGDN, ActivatorFlags::ACTIVATE_NORMAL | ActivatorFlags::INTERACTOR_INVISIBLE ) );
+        AddInteractor( InteractorParam( 1700,  700,    50,  50, INTERACTOR_BACK, ActivatorFlags::ACTIVATE_NORMAL | ActivatorFlags::INTERACTOR_DEFAULT ) );
+        AddInteractor( InteractorParam( 1700,  800,    50,  50, INTERACTOR_NEWTAB, ActivatorFlags::ACTIVATE_NORMAL | ActivatorFlags::INTERACTOR_DEFAULT ) );
+        AddInteractor( InteractorParam( 1700,  900,    50,  50, INTERACTOR_CLSTAB, ActivatorFlags::ACTIVATE_SLOW | ActivatorFlags::INTERACTOR_DANGER ) );
+        break;
+
+    case 2:
+        AddInteractor( InteractorParam(  900,   50,   200,  50, INTERACTOR_PGUP, ActivatorFlags::ACTIVATE_NORMAL | ActivatorFlags::INTERACTOR_INVISIBLE) );
+        AddInteractor( InteractorParam(  900, 1000,   200,  50, INTERACTOR_PGDN, ActivatorFlags::ACTIVATE_NORMAL | ActivatorFlags::INTERACTOR_INVISIBLE) );
+        break;
+
+    case 0:
+    default:
+        break;
+    }
 
     UpdateActivatableRegions();
 }
@@ -177,32 +201,61 @@ void MainWindow::ClearInteractorProfile() {
 }
 
 
-void MainWindow::on_hotkey_pressed() {
+void MainWindow::on_AnimationFinished() {
 
-    ToggleMouse();
+    UpdateActivatableRegions();
 }
 
 
-void MainWindow::on_buttonMain_clicked() {
+void MainWindow::on_ActivationEvent( int interactorId ) {
 
-    ToggleMenu();
 }
 
 
-void MainWindow::on_buttonMouse_clicked(){
+void MainWindow::on_FadeMenuFinished() {
 
-    ToggleMouse();
+    ui->frameMenu->hide();
+    ui->frameOp->hide();
+    ui->frameEye->hide();
+    ui->frameBci->hide();
+
+    UpdateActivatableRegions();
 }
 
 
-void MainWindow::on_buttonBCI_clicked() {
+void MainWindow::on_FadeOpsFinished() {
 
-    ToggleBrain();
+    ui->frameOp->hide();
+    UpdateActivatableRegions();
 }
 
 
-void MainWindow::on_ActivationEvent(int interactorId) {
+void MainWindow::on_FadeEyeFinished() {
 
+    ui->frameEye->hide();
+    UpdateActivatableRegions();
+}
+
+
+void MainWindow::on_FadeBciFinished() {
+
+    ui->frameBci->hide();
+    UpdateActivatableRegions();
+}
+
+
+void MainWindow::on_SystemTimer() {
+
+    HWND phWnd = GetForegroundWindow();
+    bool pFs = isProcessFullscreen( phWnd );
+
+    if ((focusedWindow == phWnd) && (focusedIsFullscreen == pFs)) return;
+
+    focusedWindow = phWnd;
+    focusedIsFullscreen = pFs;
+    focusedExecutable = GetProcessName( phWnd );
+
+    UpdateFocusedProcess();
 }
 
 
@@ -344,17 +397,10 @@ void MainWindow::on_ThoughtActivated() {
 }
 
 
-void MainWindow::on_Suppress() {
+void MainWindow::on_SuppressFinished() {
 
-    suppressEyeEvents = false;
+    suppressEyes = false;
     suppressTimer.stop();
-}
-
-
-void MainWindow::SuppressEyeEvents( int msec ) {
-
-    suppressEyeEvents = true;
-    suppressTimer.start( msec );
 }
 
 
@@ -389,203 +435,380 @@ void MainWindow::ToggleBrain() {
 
 void MainWindow::ToggleMenu() {
 
-    ShowMenu( !IsVisibleMenu() );
+    ShowMenu( !isVisibleMenu() );
 
     UpdateActivatableRegions();
 }
 
 
-void MainWindow::SlideMenu(int position) {
+void MainWindow::SlideMenu( int position ) {
 
+    int x = ui->frameSlider->x();
+    int newX = MENU_START;
 
     switch (position) {
-
     case 2:
-        ui->buttonMode->move(MENU_POSITION_4, ui->buttonMode->y());
-        ui->line12->move(LINE_POSITION_34, ui->line12->y());
-        ui->buttonEyeX->move(MENU_POSITION_3, ui->buttonEyeX->y());
-        ui->line23->move(LINE_POSITION_23, ui->line23->y());
-        ui->buttonOpenBci->move(MENU_POSITION_2, ui->buttonOpenBci->y());
+        newX = MENU_START + MENU_SPACE;
         break;
 
     case 3:
-        ui->buttonMode->move(MENU_POSITION_5, ui->buttonMode->y());
-        ui->line12->move(LINE_POSITION_45, ui->line12->y());
-        ui->buttonEyeX->move(MENU_POSITION_4, ui->buttonEyeX->y());
-        ui->line23->move(LINE_POSITION_34, ui->line23->y());
-        ui->buttonOpenBci->move(MENU_POSITION_3, ui->buttonOpenBci->y());
+        newX = MENU_START + (MENU_SPACE * 2);
         break;
+    }
 
-    case 1:
-    default:
-        ui->buttonMode->move(MENU_POSITION_3, ui->buttonMode->y());
-        ui->line12->move(LINE_POSITION_23, ui->line12->y());
-        ui->buttonEyeX->move(MENU_POSITION_2, ui->buttonEyeX->y());
-        ui->line23->move(LINE_POSITION_12, ui->line23->y());
-        ui->buttonOpenBci->move(MENU_POSITION_1, ui->buttonOpenBci->y());
+    int y = ui->frameSlider->y();
+    int w = ui->frameSlider->width();
+    int h = ui->frameSlider->height();
+
+    QPropertyAnimation *animation = new QPropertyAnimation(ui->frameSlider, "geometry");
+
+    animation->setDuration(400);
+    animation->setStartValue( QRect(x, y, w, h) );
+    animation->setEndValue( QRect(newX, y, w, h) );
+
+    connect(animation, SIGNAL(finished()), this, SLOT( on_AnimationFinished()) );
+
+    animation->start(QAbstractAnimation::DeleteWhenStopped);
+}
+
+
+void MainWindow::ShowMenu( bool visible ) {
+
+    if (visible == true) {
+
+        if (! isVisibleMenu()) {
+
+            QGraphicsOpacityEffect *effect = new QGraphicsOpacityEffect(this);
+
+            ui->frameMenu->setGraphicsEffect(effect);
+
+            QPropertyAnimation *a = new QPropertyAnimation(effect,"opacity");
+            a->setDuration(400);
+            a->setStartValue(0);
+            a->setEndValue(1);
+            a->setEasingCurve(QEasingCurve::InBack);
+            a->start(QPropertyAnimation::DeleteWhenStopped);
+
+            ui->frameMenu->show();
+        }
+
+    } else {
+
+        QGraphicsOpacityEffect *effect = new QGraphicsOpacityEffect(this);
+
+        if (isVisibleMenu()) ui->frameMenu->setGraphicsEffect(effect);
+        if (isVisibleOp())   ShowOp( false );
+        if (isVisibleEye())  ShowEye( false );
+        if (isVisibleBci())  ShowBci( false );
+
+        QPropertyAnimation *a = new QPropertyAnimation(effect,"opacity");
+        a->setDuration(700);
+        a->setStartValue(1);
+        a->setEndValue(0);
+        a->setEasingCurve(QEasingCurve::OutBack);
+        a->start(QPropertyAnimation::DeleteWhenStopped);
+
+        connect(a,SIGNAL(finished()),this,SLOT(on_FadeMenuFinished()));
     }
 
     UpdateActivatableRegions();
 }
 
 
-void MainWindow::ShowMenu(bool visible) {
-
-    if (visible == false) {
-
-        ShowDialogMode( visible );
-        ShowDialogEye( visible );
-        ShowDialogBrain( visible );
-    }
-
-    ui->buttonMode->setVisible( visible );
-    ui->buttonEyeX->setVisible( visible );
-    ui->buttonOpenBci->setVisible( visible );
-
-    ui->lineDialog->setVisible( false );
-    ui->lineMenu->setVisible( visible );
-    ui->line12->setVisible( visible );
-    ui->line23->setVisible( visible );
-
-    if (visible == true) SlideMenu(1);
-
-    UpdateActivatableRegions();
-}
-
-
-void MainWindow::ShowDialogMode(bool visible) {
+void MainWindow::ShowOp( bool visible ) {
 
     if (visible == true) {
 
-        ShowDialogEye(false);
-        ShowDialogBrain(false);
-    }
+        ShowEye(false);
+        ShowBci(false);
 
-    ui->labelMode->setVisible( visible );
-    ui->buttonModeRead->setVisible( visible );
-    ui->buttonModeQt->setVisible( visible );
-    ui->buttonModePhp->setVisible( visible );
-    ui->buttonModeOff->setVisible( visible );
+        if (! isVisibleOp()) {
 
-    if (visible == true) {
-        ui->lineDialog->setVisible( true );
-    }
+            QGraphicsOpacityEffect *effect = new QGraphicsOpacityEffect(this);
 
-    UpdateActivatableRegions();
-}
+            ui->frameOp->setGraphicsEffect(effect);
 
+            QPropertyAnimation *a = new QPropertyAnimation(effect,"opacity");
+            a->setDuration(700);
+            a->setStartValue(0);
+            a->setEndValue(1);
+            a->setEasingCurve(QEasingCurve::InBack);
+            a->start(QPropertyAnimation::DeleteWhenStopped);
 
-void MainWindow::ShowDialogEye(bool visible) {
+            ui->frameOp->show();
+        }
 
-    if (visible == true) {
+    } else {
 
-        ShowDialogMode(false);
-        ShowDialogBrain(false);
-    }
+        QGraphicsOpacityEffect *effect = new QGraphicsOpacityEffect(this);
 
-    ui->labelEye->setVisible( visible );
-    ui->buttonEye1->setVisible( visible );
-    ui->buttonEye2->setVisible( visible );
-    ui->buttonEye3->setVisible( visible );
-    ui->buttonEye4->setVisible( visible );
+        ui->frameOp->setGraphicsEffect(effect);
 
-    if (visible == true) {
-        ui->lineDialog->setVisible( true );
+        QPropertyAnimation *a = new QPropertyAnimation(effect,"opacity");
+        a->setDuration(700);
+        a->setStartValue(1);
+        a->setEndValue(0);
+        a->setEasingCurve(QEasingCurve::OutBack);
+        a->start(QPropertyAnimation::DeleteWhenStopped);
+
+        connect(a,SIGNAL(finished()),this,SLOT(on_FadeOpsFinished()));
     }
 
     UpdateActivatableRegions();
 }
 
 
-void MainWindow::ShowDialogBrain(bool visible) {
+void MainWindow::ShowEye( bool visible ) {
 
     if (visible == true) {
 
-        ShowDialogMode(false);
-        ShowDialogEye(false);
-    }
+        ShowOp(false);
+        ShowBci(false);
 
-    ui->labelBci->setVisible( visible );
-    ui->buttonBci1->setVisible( visible );
-    ui->buttonBci2->setVisible( visible );
-    ui->buttonBci3->setVisible( visible );
-    ui->buttonBci4->setVisible( visible );
+        if (! isVisibleEye()) {
 
-    if (visible == true) {
-        ui->lineDialog->setVisible( true );
+            QGraphicsOpacityEffect *effect = new QGraphicsOpacityEffect(this);
+
+            ui->frameEye->setGraphicsEffect(effect);
+
+            QPropertyAnimation *a = new QPropertyAnimation(effect,"opacity");
+            a->setDuration(700);
+            a->setStartValue(0);
+            a->setEndValue(1);
+            a->setEasingCurve(QEasingCurve::InBack);
+            a->start(QPropertyAnimation::DeleteWhenStopped);
+
+            ui->frameEye->show();
+        }
+
+    } else {
+
+        QGraphicsOpacityEffect *effect = new QGraphicsOpacityEffect(this);
+
+        ui->frameEye->setGraphicsEffect(effect);
+
+        QPropertyAnimation *a = new QPropertyAnimation(effect,"opacity");
+        a->setDuration(700);
+        a->setStartValue(1);
+        a->setEndValue(0);
+        a->setEasingCurve(QEasingCurve::OutBack);
+        a->start(QPropertyAnimation::DeleteWhenStopped);
+
+        connect(a,SIGNAL(finished()),this,SLOT(on_FadeEyeFinished()));
     }
 
     UpdateActivatableRegions();
 }
 
 
+void MainWindow::ShowBci( bool visible ) {
 
-bool MainWindow::IsVisibleMenu() {
+    if (visible == true) {
 
-    return ui->buttonMode->isVisible();
+        ShowOp(false);
+        ShowEye(false);
+
+        if (! isVisibleBci()) {
+
+            QGraphicsOpacityEffect *effect = new QGraphicsOpacityEffect(this);
+
+            ui->frameBci->setGraphicsEffect(effect);
+
+            QPropertyAnimation *a = new QPropertyAnimation(effect,"opacity");
+            a->setDuration(700);
+            a->setStartValue(0);
+            a->setEndValue(1);
+            a->setEasingCurve(QEasingCurve::InBack);
+            a->start(QPropertyAnimation::DeleteWhenStopped);
+
+            ui->frameBci->show();
+        }
+
+    } else {
+
+        QGraphicsOpacityEffect *effect = new QGraphicsOpacityEffect(this);
+
+        ui->frameBci->setGraphicsEffect(effect);
+
+        QPropertyAnimation *a = new QPropertyAnimation(effect,"opacity");
+        a->setDuration(700);
+        a->setStartValue(1);
+        a->setEndValue(0);
+        a->setEasingCurve(QEasingCurve::OutBack);
+        a->start(QPropertyAnimation::DeleteWhenStopped);
+
+        connect(a,SIGNAL(finished()),this,SLOT(on_FadeBciFinished()));
+    }
+
+    UpdateActivatableRegions();
 }
 
 
-bool MainWindow::IsVisibleDialogMode() {
+void MainWindow::SuppressEyes( int msec ) {
 
-    return ui->labelMode->isVisible();
-}
-
-
-bool MainWindow::IsVisibleDialogEye() {
-
-    return ui->labelEye->isVisible();
-}
-
-
-bool MainWindow::IsVisibleDialogBrain() {
-
-    return ui->labelBci->isVisible();
+    suppressEyes = true;
+    suppressTimer.start( msec );
 }
 
 
 
-void MainWindow::on_buttonMode_clicked() {
+bool MainWindow::isVisibleMenu() {
 
-    if (IsVisibleDialogMode()) return;
+    return ui->frameMenu->isVisible();
+}
 
-    ShowDialogMode( true );
+
+bool MainWindow::isVisibleOp() {
+
+    return ui->frameOp->isVisible();
+}
+
+
+bool MainWindow::isVisibleEye() {
+
+    return ui->frameEye->isVisible();
+}
+
+
+bool MainWindow::isVisibleBci() {
+
+    return ui->frameBci->isVisible();
+}
+
+
+
+void MainWindow::on_hotkey_pressed() {
+
+    ToggleMouse();
+}
+
+
+void MainWindow::on_buttonMouse_clicked(){
+
+    ToggleMouse();
+}
+
+
+void MainWindow::on_buttonMain_clicked() {
+
+    ToggleMenu();
+}
+
+
+
+void MainWindow::on_buttonOp_clicked() {
+
+    if (isVisibleOp()) return;
 
     SlideMenu(1);
+
+    ShowOp( true );
 }
 
 
-void MainWindow::on_buttonModeOff_clicked() {
+void MainWindow::on_buttonOp1_clicked() {
 
-    ClearInteractorProfile();
+    SetInteractorProfile(0);
 }
 
 
-void MainWindow::on_buttonModeRead_clicked() {
+void MainWindow::on_buttonOp2_clicked() {
 
-
-    ClearInteractorProfile();
-    SetInteractorProfile();
 }
 
 
-void MainWindow::on_buttonEyeX_clicked() {
+void MainWindow::on_buttonOp3_clicked() {
 
-    if (IsVisibleDialogEye()) return;
+    SetInteractorProfile(1);
+}
 
-    ShowDialogEye( true );
+
+void MainWindow::on_buttonOp4_clicked() {
+
+}
+
+
+void MainWindow::on_buttonEye_clicked() {
+
+    if (isVisibleEye()) return;
+
+    ShowEye( true );
 
     SlideMenu(2);
 }
 
 
-void MainWindow::on_buttonOpenBci_clicked() {
+void MainWindow::on_buttonBci_clicked() {
 
-    if (IsVisibleDialogBrain()) return;
+    if (isVisibleBci()) return;
 
-    ShowDialogBrain( true );
+    ShowBci( true );
 
     SlideMenu(3);
 }
 
+
+QString MainWindow::GetProcessName( HWND window ) {
+
+    DWORD   processId;
+
+    GetWindowThreadProcessId(window , &processId);
+
+    TCHAR buffer[MAX_PATH] = TEXT("unknown");
+
+    HANDLE hProcess = OpenProcess( PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, processId );
+
+    if (NULL != hProcess ) {
+
+        GetModuleFileNameEx( hProcess, NULL, buffer, MAX_PATH );
+    }
+
+    QString result = QString::fromStdWString( buffer );
+
+    CloseHandle( hProcess );
+
+    return result;
+
+    // this is how you would invoke an external DLL function, in this case lock the workstation
+    //QProcess::execute("rundll32", QStringList("USER32.DLL,LockWorkStation"));
+}
+
+
+bool MainWindow::isProcessFullscreen( HWND window ) {
+
+    RECT a, b;
+    GetWindowRect(window, &a);
+    GetWindowRect(GetDesktopWindow(), &b);
+    return (a.left   == b.left  &&
+            a.top    == b.top   &&
+            a.right  == b.right &&
+            a.bottom == b.bottom);
+}
+
+
+void MainWindow::UpdateFocusedProcess() {
+
+    qDebug() << qPrintable(focusedExecutable) << focusedIsFullscreen;
+
+    if (focusedExecutable == "C:\\Windows\\explorer.exe") {
+
+        SetInteractorProfile(0);
+
+    } else if (focusedExecutable == "C:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe") {
+
+        SetInteractorProfile(1);
+
+    } else if (focusedExecutable == "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe") {
+
+        SetInteractorProfile(1);
+
+    } else if (focusedExecutable == "C:\\Qt\\Tools\\QtCreator\\bin\\qtcreator.exe") {
+
+        SetInteractorProfile(2);
+
+    } else if (focusedExecutable == "C:\\Program Files (x86)\\VideoLAN\\VLC\\vlc.exe") {
+
+        SetInteractorProfile(0);
+    }
+}
 

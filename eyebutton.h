@@ -18,6 +18,7 @@ enum ActivatorFlags {
     VERTICAL_PROGRESS_BAR           = (1<<5),
     INTERACTOR_DEFAULT              = (1<<6),
     INTERACTOR_DANGER               = (1<<7),
+    INTERACTOR_INVISIBLE            = (1<<8)
 };
 inline ActivatorFlags operator|(ActivatorFlags a, ActivatorFlags b) {
     return static_cast<ActivatorFlags>(static_cast<int>(a) | static_cast<int>(b));

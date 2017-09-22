@@ -53,6 +53,9 @@ void EyeXHost::Init(HWND hWnd) {
     success &= RegisterQueryHandler();
     success &= RegisterEventHandler();
 
+    // given a string processId representing the process id of another application:
+    // _context.RegisterQueryHandler(processId, HandleQuery);
+
     if (!success) {
 
         SetState(Failed);
@@ -72,7 +75,6 @@ void EyeXHost::Init(HWND hWnd) {
                 this, SLOT(OnGazeEvent(int, int))
     );
 
-
 }
 
 
@@ -85,12 +87,16 @@ bool EyeXHost::IsFunctional() {
 bool EyeXHost::InitializeGlobalInteractorSnapshot() {
 
     TX_HANDLE hInteractor = TX_EMPTY_HANDLE;
-    TX_GAZEPOINTDATAPARAMS params = { TX_GAZEPOINTDATAMODE_LIGHTLYFILTERED };
+    TX_GAZEPOINTDATAPARAMS paramsGaze = { TX_GAZEPOINTDATAMODE_LIGHTLYFILTERED };
+    TX_FIXATIONDATAPARAMS paramsFixation = { TX_FIXATIONDATAMODE_SENSITIVE };
 
     bool success;
 
     success = txCreateGlobalInteractorSnapshot(_context, _gazeInteractorId, &_gazeInteractorSnapshot, &hInteractor) == TX_RESULT_OK;
-    success &= txCreateGazePointDataBehavior(hInteractor, &params) == TX_RESULT_OK;
+
+    success &= txCreateGazePointDataBehavior(hInteractor, &paramsGaze) == TX_RESULT_OK;
+    success &= txCreateFixationDataBehavior(hInteractor, &paramsFixation) == TX_RESULT_OK;
+
     txReleaseObject(&hInteractor);
 
     return success;
@@ -169,12 +175,15 @@ void EyeXHost::OnEngineConnectionStateChanged(TX_CONNECTIONSTATE connectionState
 
 void EyeXHost::HandleQuery(TX_CONSTHANDLE hAsyncData) {
 
+
     TX_HANDLE hQuery(TX_EMPTY_HANDLE);
     txGetAsyncDataContent(hAsyncData, &hQuery);
 
     const int bufferSize = 20;
     TX_CHAR windowId[bufferSize];
     TX_CHAR regionId[bufferSize];
+
+    sprintf(windowId, "%d", reinterpret_cast<std::uintptr_t>(_hWnd));
 
     // read the query bounds from the query, the area on the screen that the query concerns
 
@@ -189,8 +198,6 @@ void EyeXHost::HandleQuery(TX_CONSTHANDLE hAsyncData) {
 
     TX_HANDLE hSnapshot(TX_EMPTY_HANDLE);
     txCreateSnapshotForQuery(hQuery, &hSnapshot);
-
-    sprintf(windowId, "%d", reinterpret_cast<std::uintptr_t>(_hWnd));
 
     if ( QueryIsForWindowId(hQuery, windowId) ) {
 
@@ -268,7 +275,9 @@ void EyeXHost::HandleEvent(TX_CONSTHANDLE hAsyncData) {
                 OnActivationFocusChanged(hActivatable, interactorId);
             }
         }
+
         txReleaseObject(&hActivatable);
+
     }
     if (txGetEventBehavior(hEvent, &hBehavior, TX_BEHAVIORTYPE_GAZEPOINTDATA) == TX_RESULT_OK) {
 
@@ -279,9 +288,36 @@ void EyeXHost::HandleEvent(TX_CONSTHANDLE hAsyncData) {
             int y = static_cast<int>(e.Y);
             emit GazeEvent(x, y);
         }
+
+        txReleaseObject(&hBehavior);
+
+    }
+    if (txGetEventBehavior(hEvent, &hBehavior, TX_BEHAVIORTYPE_FIXATIONDATA) == TX_RESULT_OK) {
+
+        TX_FIXATIONDATAEVENTPARAMS eventParams;
+        TX_FIXATIONDATAEVENTTYPE eventType;
+
+        if (txGetFixationDataEventParams(hBehavior, &eventParams) == TX_RESULT_OK) {
+
+            eventType = eventParams.EventType;
+
+            if (eventType == TX_FIXATIONDATAEVENTTYPE_DATA) {
+            } else if (eventType == TX_FIXATIONDATAEVENTTYPE_END) {
+                //qDebug() << qPrintable("Fixation end ") << eventParams.X << eventParams.Y;
+            } else if (eventType == TX_FIXATIONDATAEVENTTYPE_BEGIN) {
+                //qDebug() << qPrintable("Fixation begin ") << eventParams.X << eventParams.Y;
+            }
+
+        } else {
+
+            qDebug() << qPrintable("Failed to interpret fixation data event packet");
+        }
+
         txReleaseObject(&hBehavior);
     }
+
     txReleaseObject(&hEvent);
+
 }
 
 
@@ -347,6 +383,8 @@ void EyeXHost::TriggerActivationModeOn()
 }
 
 
+/* Handles an event from the gaze data stream
+ */
 void EyeXHost::OnGazeEvent(int X, int Y) {
 
     if (mouse == Mouse::Off || X < 1 || Y < 1) return;
@@ -384,9 +422,17 @@ void EyeXHost::OnGazeEvent(int X, int Y) {
 }
 
 
+/* Handles an event from the fixation data stream
+ */
+void EyeXHost::OnFixationDataEvent() {
+
+}
+
+
 void EyeXHost::OnActivationFocusChanged(TX_HANDLE hBehavior, int interactorId) {
 
     TX_ACTIVATIONFOCUSCHANGEDEVENTPARAMS eventData;
+
     if (txGetActivationFocusChangedEventParams(hBehavior, &eventData) == TX_RESULT_OK) {
 
         if (eventData.HasTentativeActivationFocus) {

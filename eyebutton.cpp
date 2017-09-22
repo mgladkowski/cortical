@@ -21,7 +21,7 @@ EyeButton::EyeButton(QWidget *parent) : QPushButton(parent) {
     suspendOnActivation = true;
     toggleActivation    = false;
 
-    defaultBackground   = "background:rgba(0,0,0,0.2);border:1px solid rgba(0,0,0,0.3);";
+    defaultBackground   = "background:rgba(0,0,0,0.4);border:1px solid rgba(0,0,0,0.3);";
     hoverBackground     = "background:rgba(41,182,246,0.2);border:3px solid rgba(41,182,246,0.6);";
     fixateBackground    = "background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop: 0 rgba(41,182,246,0.2), stop: %1 rgba(0,0,0,0.2) );border:3px solid rgba(41,182,246,0.6);";
     activeBackground    = "background:rgba(129,212,250,0.2);border:3px solid rgba(41,182,246,0.6);";
@@ -105,6 +105,15 @@ void EyeButton::on_ActivationEvent( int interactorId ) {
         if (toggleActivation) isActivated = !isActivated;
 
         stopTimers();
+
+        if (msecRecovery > 0) {
+
+            suppressEyes = true;
+
+            timerRecovery.start( msecRecovery );
+
+            if (suspendOnActivation) emit SuspendEvent( interactorId );
+        }
     }
 }
 
@@ -133,13 +142,7 @@ void EyeButton::on_ActivationFocusEvent( int interactorId ) {
 
         } else if (msecActivate == 0) {
 
-            emit ActivationEvent( interactorId );
-            qDebug() << "ActivationFocusEvent emitted ActivationEvent";
-
-            if (clickOnActivation == true) this->click();
-
-            if (toggleActivation) isActivated = !isActivated;
-
+            on_ActivationEvent( interactorId );
         }
 
         UpdateStyleState();
@@ -160,15 +163,6 @@ void EyeButton::on_Timer_Progress() {
 void EyeButton::on_Timer_Activate() {
 
     on_ActivationEvent( (int)this->winId() );
-
-    if (msecRecovery > 0) {
-
-        suppressEyes = true;
-        timerRecovery.start( msecRecovery );
-
-        if (suspendOnActivation)
-        emit SuspendEvent( (int)this->winId() );
-    }
 }
 
 
@@ -230,19 +224,18 @@ void EyeButton::setActivationType( ActivatorFlags flags ) {
         fixateBackground    = "background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop: 0 rgba(255,0,0,0.2), stop: %1 rgba(0,0,0,0.1) ); border:1px solid rgba(255,0,0,0.2);";
         hoverBackground     = "background:rgba(41,182,246,0.1); border:3px solid rgba(255,0,0,0.4);";
         activeBackground    = "background:rgba(129,212,250,0.1); border:3px solid rgba(41,182,246,0.1);";
-        UpdateStyleState();
     }
-    if (flags & ActivatorFlags::INTERACTOR_DEFAULT) {
+    if (flags & ActivatorFlags::INTERACTOR_INVISIBLE) {
 
         isInteractor        = true;
         showHover           = false;
-        showEyeHover        = true;
-        defaultBackground   = "background:rgba(0,0,0,0.1); border:1px solid rgba(0,0,0,0);";
-        fixateBackground    = "background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop: 0 rgba(41,182,246,0.1), stop: %1 rgba(0,0,0,0.1) ); border:0px solid rgba(0,0,0,0);";
-        hoverBackground     = "background:rgba(41,182,246,0.1); border:0px solid rgba(0,0,0,0);";
-        activeBackground    = "background:rgba(129,212,250,0.1); border:3px solid rgba(41,182,246,0.1);";
-        UpdateStyleState();
+        showEyeHover        = false;
+        defaultBackground   = "background:rgba(0,0,0,0.01); border:1px solid rgba(0,0,0,0);";
+        fixateBackground    = "background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop: 0 rgba(255,0,0,0.2), stop: %1 rgba(0,0,0,0.1) ); border:1px solid rgba(255,0,0,0.2);";
+        hoverBackground     = "background:rgba(0,0,0,0.01); border:1px solid rgba(0,0,0,0);";
+        activeBackground    = "background:rgba(0,0,0,0.01); border:1px solid rgba(0,0,0,0);";
     }
+    UpdateStyleState();
 }
 
 

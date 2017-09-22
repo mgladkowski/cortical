@@ -10,43 +10,20 @@
 #include <QTimer>
 #include <QThread>
 #include <QLabel>
-#include <QMessageBox>
+#include <QPropertyAnimation>
+#include <QGraphicsOpacityEffect>
 #include <windows.h>
+#include <stdio.h>
+#include <tchar.h>
+#include <iostream>
+#include <psapi.h>
 #include "eyexhost.h"
 #include "eyebutton.h"
 #include "bcihost.h"
 
 
-
-#define IDC_ACTIVATOR_BUTTON    "buttonMain"
-#define IDC_MOUSE_BUTTON        "buttonMouse"
-#define IDC_BCI_BUTTON          "buttonBCI"
-#define IDC_BUTTON_MENU_MODE    "buttonMode"
-#define IDC_BUTTON_MENU_EYEX    "buttonEyeX"
-#define IDC_BUTTON_MENU_BCI     "buttonOpenBci"
-#define IDC_BUTTON_MODE_READ    "buttonModeRead"
-#define IDC_BUTTON_MODE_QT      "buttonModeQt"
-#define IDC_BUTTON_MODE_PHP     "buttonModePhp"
-#define IDC_BUTTON_MODE_OFF     "buttonModeOff"
-#define IDC_BUTTON_BCI_1        301
-#define IDC_BUTTON_BCI_2        302
-#define IDC_BUTTON_BCI_3        303
-#define IDC_BUTTON_BCI_4        304
-#define IDC_BUTTON_EYEX_1       401
-#define IDC_BUTTON_EYEX_2       402
-#define IDC_BUTTON_EYEX_3       403
-#define IDC_BUTTON_EYEX_4       404
-
-
-#define MENU_POSITION_1         90
-#define LINE_POSITION_12        200
-#define MENU_POSITION_2         310
-#define LINE_POSITION_23        420
-#define MENU_POSITION_3         530
-#define LINE_POSITION_34        640
-#define MENU_POSITION_4         750
-#define LINE_POSITION_45        860
-#define MENU_POSITION_5         970
+#define MENU_START              0
+#define MENU_SPACE              260
 
 #define INTERACTOR_BACK         "interactor_BACK"
 #define INTERACTOR_PGUP         "interactor_PGUP"
@@ -92,6 +69,7 @@ public:
                 ~MainWindow();
 
     EyeXHost    eyes;
+
     BciHost     brain;
 
     void        on_hotkey_pressed();
@@ -101,33 +79,44 @@ private:
 
     Ui::MainWindow  *ui;
 
+    QTimer      systemTimer;
     QTimer      suppressTimer;
-    bool        suppressEyeEvents   = false;
+    bool        suppressEyes = false;
+
+    HWND        focusedWindow;
+    QString     focusedExecutable;
+    bool        focusedIsFullscreen;
+
+    bool        isProcessFullscreen( HWND window );
+
+    QString     GetProcessName( HWND handle );
+    void        UpdateFocusedProcess();
 
     void        InitializeUi();
 
     void        AddInteractor( InteractorParam data );
-    void        SetInteractorProfile();
+    void        SetInteractorProfile( int profileId );
     void        ClearInteractorProfile();
-    void        SuppressEyeEvents( int msec );
 
     RECT        GetScreenBounds( EyeButton * button );
     void        UpdateActivatableRegions();
+    void        SuppressEyes( int msec );
 
     void        ToggleMouse();
     void        ToggleBrain();
     void        ToggleMenu();
+
     void        SlideMenu( int position );
+    void        ShowMenu( bool visible );
+    void        ShowOp( bool visible );
+    void        ShowEye( bool visible );
+    void        ShowBci( bool visible );
 
-    void        ShowMenu(bool visible);
-    void        ShowDialogMode(bool visible);
-    void        ShowDialogEye(bool visible);
-    void        ShowDialogBrain(bool visible);
 
-    bool        IsVisibleMenu();
-    bool        IsVisibleDialogMode();
-    bool        IsVisibleDialogEye();
-    bool        IsVisibleDialogBrain();
+    bool        isVisibleMenu();
+    bool        isVisibleOp();
+    bool        isVisibleEye();
+    bool        isVisibleBci();
 
 
 signals:
@@ -135,23 +124,29 @@ signals:
 public slots:
 
     void        on_ActivationEvent( int interactorId );
-
+    void        on_AnimationFinished();
+    void        on_FadeMenuFinished();
+    void        on_FadeOpsFinished();
+    void        on_FadeEyeFinished();
+    void        on_FadeBciFinished();
+    void        on_SystemTimer();
 
 private slots:
 
-    void        on_Suppress();
-
     void        on_InteractorActivated();
     void        on_ThoughtActivated();
+    void        on_SuppressFinished();
 
-    void        on_buttonMain_clicked();
     void        on_buttonMouse_clicked();
-    void        on_buttonBCI_clicked();
-    void        on_buttonOpenBci_clicked();
-    void        on_buttonEyeX_clicked();
-    void        on_buttonMode_clicked();
-    void        on_buttonModeOff_clicked();
-    void        on_buttonModeRead_clicked();
+    void        on_buttonMain_clicked();
+
+    void        on_buttonOp_clicked();
+    void        on_buttonOp1_clicked();
+    void        on_buttonOp2_clicked();
+    void        on_buttonOp3_clicked();
+    void        on_buttonOp4_clicked();
+    void        on_buttonEye_clicked();
+    void        on_buttonBci_clicked();
 };
 
 #endif // MAINWINDOW_H

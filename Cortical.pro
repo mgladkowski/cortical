@@ -23,6 +23,9 @@ TEMPLATE = app
 LIBS += D:/Qt/projects/Cortical/lib/Tobii.EyeX.Client.lib
 LIBS += D:/Qt/projects/Cortical/lib/gdi32.lib
 LIBS += D:/Qt/projects/Cortical/lib/gdiplus.lib
+LIBS += "C:/Program Files (x86)/Windows Kits/10/Lib/10.0.15063.0/um/x86/Psapi.Lib"
+
+
 
 include(qhotkey.pri)
 

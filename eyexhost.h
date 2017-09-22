@@ -99,6 +99,8 @@ signals:
 
     void GazeEvent(int X, int Y);
 
+    void FixationEvent();
+
     void ActivationEvent(int interactorId);
 
     void ActivationFocusEvent(int interactorId);
@@ -107,6 +109,8 @@ signals:
 public slots:
 
     void OnGazeEvent(int X, int Y);
+
+    void OnFixationDataEvent();
 
 };
 

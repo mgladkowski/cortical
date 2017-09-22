@@ -12,5 +12,9 @@
         <file>dev/glyphicons-601-chevron-up.png</file>
         <file>dev/glyphicons-608-modal-window.png</file>
         <file>dev/glyphicons-722-mouse.png</file>
+        <file>dev/glyphicons-283-cardio.png</file>
+        <file>dev/glyphicons-283-cardio@2x.png</file>
+        <file>dev/glyphicons-440-wrench.png</file>
+        <file>dev/glyphicons-440-wrench@2x.png</file>
     </qresource>
 </RCC>
