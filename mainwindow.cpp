@@ -17,7 +17,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     InitializeUi();
 
-    SetInteractorProfile( ITR_PROFILE_BROWSER );
+    SetInteractorProfile( ITP_BROWSER );
 
     eyes.Init( (HWND)this->winId() );
 
@@ -188,7 +188,7 @@ void MainWindow::AddInteractor( Interactor data ) {
 }
 
 
-void MainWindow::SetInteractorProfile( int profileId = ITR_PROFILE_NONE ) {
+void MainWindow::SetInteractorProfile( int profileId = ITP_NONE ) {
 
     if (currentProfile == profileId) return;
 
@@ -196,7 +196,7 @@ void MainWindow::SetInteractorProfile( int profileId = ITR_PROFILE_NONE ) {
     currentProfile = profileId;
 
     switch (profileId) {
-    case ITR_PROFILE_BROWSER:
+    case ITP_BROWSER:
         AddInteractor(Interactor(  860,   50,  200,  50, ITK_PAGEUP,
                                    glyphicons_chevron_up,
                                    GetPresetInteractor(STYLE_INTERACTOR) ));
@@ -218,7 +218,7 @@ void MainWindow::SetInteractorProfile( int profileId = ITR_PROFILE_NONE ) {
                                   GetPresetInteractor(STYLE_DANGER) ));
         break;
 
-    case ITR_PROFILE_BROWSER_FS:
+    case ITP_BROWSER_FS:
         AddInteractor(Interactor(  860,  600,  70,  70, ITK_SPACE,
                                    glyphicons_pause,
                                    GetPresetInteractor(STYLE_INTERACTOR) ));
@@ -228,7 +228,7 @@ void MainWindow::SetInteractorProfile( int profileId = ITR_PROFILE_NONE ) {
                                    GetPresetInteractor(STYLE_INTERACTOR) ));
         break;
 
-    case ITR_PROFILE_VLC:
+    case ITP_VLC:
         AddInteractor(Interactor(  660,  600,  70,  70, ITK_P,
                                    glyphicons_step_backward,
                                    GetPresetInteractor(STYLE_INTERACTOR) ));
@@ -246,7 +246,7 @@ void MainWindow::SetInteractorProfile( int profileId = ITR_PROFILE_NONE ) {
                                    GetPresetInteractor(STYLE_INTERACTOR) ));
         break;
 
-    case ITR_PROFILE_VLC_FS:
+    case ITP_VLC_FS:
         AddInteractor(Interactor(  660,  600,  70,  70, ITK_P,
                                    glyphicons_step_backward,
                                    GetPresetInteractor(STYLE_INTERACTOR) ));
@@ -264,7 +264,7 @@ void MainWindow::SetInteractorProfile( int profileId = ITR_PROFILE_NONE ) {
                                    GetPresetInteractor(STYLE_INTERACTOR) ));
         break;
 
-    case ITR_PROFILE_DEV:
+    case ITP_DEV:
         AddInteractor(Interactor(  860,   50,  200,  50, ITK_PAGEUP,
                                    glyphicons_chevron_up,
                                    GetPresetInteractor(STYLE_INTERACTOR) ));
@@ -274,7 +274,7 @@ void MainWindow::SetInteractorProfile( int profileId = ITR_PROFILE_NONE ) {
                                    GetPresetInteractor(STYLE_INTERACTOR) ));
         break;
 
-    case ITR_PROFILE_NONE:
+    case ITP_NONE:
     default:
         break;
     }
@@ -415,32 +415,32 @@ void MainWindow::UpdateFocusedProcess() {
 
     if (focusedExecutable == "C:\\Windows\\explorer.exe") {
 
-        SetInteractorProfile( ITR_PROFILE_EXPLORER );
+        SetInteractorProfile( ITP_EXPLORER );
 
     } else if (focusedExecutable == "C:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe") {
 
         SetInteractorProfile( focusedIsFullscreen
-                              ? ITR_PROFILE_BROWSER_FS
-                              : ITR_PROFILE_BROWSER );
+                              ? ITP_BROWSER_FS
+                              : ITP_BROWSER );
 
     } else if (focusedExecutable == "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe") {
 
         SetInteractorProfile( focusedIsFullscreen
-                              ? ITR_PROFILE_BROWSER_FS
-                              : ITR_PROFILE_BROWSER );
+                              ? ITP_BROWSER_FS
+                              : ITP_BROWSER );
 
     } else if (focusedExecutable == "C:\\Qt\\Tools\\QtCreator\\bin\\qtcreator.exe") {
 
-        SetInteractorProfile( ITR_PROFILE_DEV );
+        SetInteractorProfile( ITP_DEV );
 
     } else if (focusedExecutable == "C:\\Program Files (x86)\\VideoLAN\\VLC\\vlc.exe") {
 
         SetInteractorProfile( focusedIsFullscreen
-                              ? ITR_PROFILE_VLC_FS
-                              : ITR_PROFILE_VLC );
+                              ? ITP_VLC_FS
+                              : ITP_VLC );
     } else {
 
-        SetInteractorProfile( ITR_PROFILE_NONE );
+        SetInteractorProfile( ITP_NONE );
     }
 }
 

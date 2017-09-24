@@ -37,13 +37,13 @@
 #define ITK_P                   "ITK_P"
 #define ITK_F                   "ITK_F"
 
-#define ITR_PROFILE_NONE        0
-#define ITR_PROFILE_EXPLORER    1
-#define ITR_PROFILE_BROWSER     2
-#define ITR_PROFILE_BROWSER_FS  3
-#define ITR_PROFILE_VLC         4
-#define ITR_PROFILE_VLC_FS      5
-#define ITR_PROFILE_DEV         6
+#define ITP_NONE        0
+#define ITP_EXPLORER    1
+#define ITP_BROWSER     2
+#define ITP_BROWSER_FS  3
+#define ITP_VLC         4
+#define ITP_VLC_FS      5
+#define ITP_DEV         6
 
 
 namespace Ui {
