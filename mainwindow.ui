@@ -63,14 +63,10 @@ QPushButton:hover{
          </rect>
         </property>
         <property name="styleSheet">
-         <string notr="true">background:rgba(0,0,0,0.2);border:1px solid rgba(0,0,0,0.3)</string>
+         <string notr="true">background:rgba(0,0,0,0.2);border:1px solid rgba(0,0,0,0.3);color:#4FC3F7;</string>
         </property>
         <property name="text">
          <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="icons.qrc">
-          <normaloff>:/dev/glyphicons-722-mouse.png</normaloff>:/dev/glyphicons-722-mouse.png</iconset>
         </property>
         <property name="checkable">
          <bool>false</bool>
@@ -89,14 +85,10 @@ QPushButton:hover{
          </rect>
         </property>
         <property name="styleSheet">
-         <string notr="true">background:rgba(0,0,0,0.2);border:1px solid rgba(0,0,0,0.3)</string>
+         <string notr="true">background:rgba(0,0,0,0.2);border:1px solid rgba(0,0,0,0.3);color:#4FC3F7;</string>
         </property>
         <property name="text">
          <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="icons.qrc">
-          <normaloff>:/dev/glyphicons-601-chevron-up.png</normaloff>:/dev/glyphicons-601-chevron-up.png</iconset>
         </property>
         <property name="checkable">
          <bool>false</bool>
@@ -587,14 +579,10 @@ QPushButton:hover{
            </rect>
           </property>
           <property name="styleSheet">
-           <string notr="true">background:rgba(0,0,0,0.2);border:1px solid rgba(0,0,0,0.3)</string>
+           <string notr="true">background:rgba(0,0,0,0.2);border:1px solid rgba(0,0,0,0.3);color:#4FC3F7;</string>
           </property>
           <property name="text">
            <string/>
-          </property>
-          <property name="icon">
-           <iconset resource="icons.qrc">
-            <normaloff>:/dev/glyphicons-440-wrench@2x.png</normaloff>:/dev/glyphicons-440-wrench@2x.png</iconset>
           </property>
           <property name="iconSize">
            <size>
@@ -681,14 +669,10 @@ QPushButton:hover{
            <bool>false</bool>
           </property>
           <property name="styleSheet">
-           <string notr="true">background:rgba(0,0,0,0.2);border:1px solid rgba(0,0,0,0.3)</string>
+           <string notr="true">background:rgba(0,0,0,0.2);border:1px solid rgba(0,0,0,0.3);color:#4FC3F7;</string>
           </property>
           <property name="text">
            <string/>
-          </property>
-          <property name="icon">
-           <iconset resource="icons.qrc">
-            <normaloff>:/dev/glyphicons-283-cardio@2x.png</normaloff>:/dev/glyphicons-283-cardio@2x.png</iconset>
           </property>
           <property name="iconSize">
            <size>
@@ -710,14 +694,10 @@ QPushButton:hover{
            </rect>
           </property>
           <property name="styleSheet">
-           <string notr="true">background:rgba(0,0,0,0.2);border:1px solid rgba(0,0,0,0.3)</string>
+           <string notr="true">background:rgba(0,0,0,0.2);border:1px solid rgba(0,0,0,0.3);color:#4FC3F7;</string>
           </property>
           <property name="text">
            <string/>
-          </property>
-          <property name="icon">
-           <iconset resource="icons.qrc">
-            <normaloff>:/dev/glyphicons-52-eye-open.png</normaloff>:/dev/glyphicons-52-eye-open.png</iconset>
           </property>
           <property name="iconSize">
            <size>
@@ -751,8 +731,6 @@ QPushButton:hover{
    <header location="global">eyebutton.h</header>
   </customwidget>
  </customwidgets>
- <resources>
-  <include location="icons.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

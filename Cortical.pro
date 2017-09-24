@@ -53,7 +53,9 @@ HEADERS += \
     eyex/EyeX.h \
     eyexhost.h \
     bcihost.h \
-    eyebutton.h
+    eyebutton.h \
+    glyphicons.h \
+    interactor.h
 
 FORMS += \
         mainwindow.ui

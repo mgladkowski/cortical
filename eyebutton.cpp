@@ -7,8 +7,8 @@ EyeButton::EyeButton(QWidget *parent) : QPushButton(parent) {
     isHovered           = false;
     isEyeHovered        = false;
     isActivated         = false;
-    isInteractor        = false;
 
+    isInteractor        = false;
     showHover           = true;
     showEyeHover        = true;
     showProgress        = true;
@@ -21,10 +21,10 @@ EyeButton::EyeButton(QWidget *parent) : QPushButton(parent) {
     suspendOnActivation = true;
     toggleActivation    = false;
 
-    defaultBackground   = "background:rgba(0,0,0,0.4);border:1px solid rgba(0,0,0,0.3);";
-    hoverBackground     = "background:rgba(41,182,246,0.2);border:3px solid rgba(41,182,246,0.6);";
-    fixateBackground    = "background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop: 0 rgba(41,182,246,0.2), stop: %1 rgba(0,0,0,0.2) );border:3px solid rgba(41,182,246,0.6);";
-    activeBackground    = "background:rgba(129,212,250,0.2);border:3px solid rgba(41,182,246,0.6);";
+    styleDefault   = "background:rgba(0,0,0,0.4);border:1px solid rgba(0,0,0,0.3);";
+    styleHover     = "background:rgba(41,182,246,0.2);border:3px solid rgba(41,182,246,0.6);";
+    styleFixate    = "background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop: 0 rgba(41,182,246,0.2), stop: %1 rgba(0,0,0,0.2) );border:3px solid rgba(41,182,246,0.6);";
+    styleActive    = "background:rgba(129,212,250,0.2);border:3px solid rgba(41,182,246,0.6);";
 
     UpdateStyleState();
 
@@ -65,28 +65,28 @@ EyeButton::EyeButton(QWidget *parent) : QPushButton(parent) {
                 &timerRecovery, SIGNAL(timeout()),
                 this, SLOT(on_Timer_Recovery())
     );
-
+    setParent(parent);
 }
 
 
 void EyeButton::UpdateStyleSheet() {
 
-    setStyleSheet( currentBackground );
+    setStyleSheet( styleCurrent );
     update();
 }
 
 
 void EyeButton::UpdateStyleState() {
 
-    currentBackground = defaultBackground;
+    styleCurrent = styleDefault;
 
-    currentBackground = (isActivated)
-            ? activeBackground
-            : currentBackground;
+    styleCurrent = (isActivated)
+            ? styleActive
+            : styleCurrent;
 
-    currentBackground = ((showHover && isHovered) || (showEyeHover && isEyeHovered))
-            ? hoverBackground
-            : currentBackground;
+    styleCurrent = ((showHover && isHovered))
+            ? styleHover
+            : styleCurrent;
 
     UpdateStyleSheet();
 }
@@ -155,7 +155,7 @@ void EyeButton::on_Timer_Progress() {
     progressCounter = progressCounter + 0.05;
     if (progressCounter > 1) progressCounter = 1;
 
-    currentBackground = fixateBackground.arg(QString::number( progressCounter ));
+    styleCurrent = styleFixate.arg(QString::number( progressCounter ));
     UpdateStyleSheet();
 }
 
@@ -183,58 +183,34 @@ void EyeButton::stopTimers() {
 }
 
 
-void EyeButton::setActivationType( ActivatorFlags flags ) {
+void EyeButton::setProperties( Interactor data ) {
 
-    if (flags & ActivatorFlags::ACTIVATE_QUICK) {
-        msecActivate = 400;
-        msecRecovery = 400;
-    }
-    if (flags & ActivatorFlags::ACTIVATE_NORMAL) {
-        msecActivate = 1200;
-        msecRecovery = 500;
-    }
-    if (flags & ActivatorFlags::ACTIVATE_SLOW) {
-        msecActivate = 3000;
-        msecRecovery = 500;
-    }
-    if (flags & ActivatorFlags::ACTIVATE_INSTANT) {
-        msecActivate = 100;
-        msecRecovery = 500;
-    }
-    if (flags & ActivatorFlags::HIDE_PROGRESS_BAR) {
-        showProgress = false;
-    }
-    if (flags & ActivatorFlags::INTERACTOR_DEFAULT) {
+    setObjectName( data.name );
+    setText( data.icon );
+    setGeometry( data.x, data.y, data.width, data.height );
+    setStyle( data.params );
+}
 
-        isInteractor        = true;
-        showHover           = false;
-        showEyeHover        = true;
-        defaultBackground   = "background:rgba(0,0,0,0.1); border:1px solid rgba(0,0,0,0);";
-        fixateBackground    = "background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop: 0 rgba(41,182,246,0.1), stop: %1 rgba(0,0,0,0.1) ); border:0px solid rgba(0,0,0,0);";
-        hoverBackground     = "background:rgba(41,182,246,0.1); border:0px solid rgba(0,0,0,0);";
-        activeBackground    = "background:rgba(129,212,250,0.1); border:3px solid rgba(41,182,246,0.1);";
-        UpdateStyleState();
-    }
-    if (flags & ActivatorFlags::INTERACTOR_DANGER) {
 
-        isInteractor        = true;
-        showHover           = false;
-        showEyeHover        = true;
-        defaultBackground   = "background:rgba(0,0,0,0.1); border:1px solid rgba(0,0,0,0);";
-        fixateBackground    = "background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop: 0 rgba(255,0,0,0.2), stop: %1 rgba(0,0,0,0.1) ); border:1px solid rgba(255,0,0,0.2);";
-        hoverBackground     = "background:rgba(41,182,246,0.1); border:3px solid rgba(255,0,0,0.4);";
-        activeBackground    = "background:rgba(129,212,250,0.1); border:3px solid rgba(41,182,246,0.1);";
-    }
-    if (flags & ActivatorFlags::INTERACTOR_INVISIBLE) {
+void EyeButton::setStyle( Interactor::Params params ) {
 
-        isInteractor        = true;
-        showHover           = false;
-        showEyeHover        = false;
-        defaultBackground   = "background:rgba(0,0,0,0.01); border:1px solid rgba(0,0,0,0);";
-        fixateBackground    = "background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop: 0 rgba(255,0,0,0.2), stop: %1 rgba(0,0,0,0.1) ); border:1px solid rgba(255,0,0,0.2);";
-        hoverBackground     = "background:rgba(0,0,0,0.01); border:1px solid rgba(0,0,0,0);";
-        activeBackground    = "background:rgba(0,0,0,0.01); border:1px solid rgba(0,0,0,0);";
-    }
+    setFocusPolicy(Qt::NoFocus);
+
+    isInteractor        = params.isInteractor;
+    showHover           = params.showHover;
+    showEyeHover        = params.showEyeHover;
+    showProgress        = params.showProgress;
+    suppressEyes        = params.suppressEyes;
+    clickOnActivation   = params.clickOnActivation;
+    suspendOnActivation = params.suspendOnActivation;
+    toggleActivation    = params.toggleActivation;
+    msecActivate        = params.msecActivate;
+    msecRecovery        = params.msecRecovery;
+    styleDefault        = params.styleDefault;
+    styleFixate         = params.styleFixate;
+    styleHover          = params.styleHover;
+    styleActive         = params.styleActive;
+
     UpdateStyleState();
 }
 

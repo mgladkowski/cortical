@@ -2,60 +2,53 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QThread>
+#include <QHotkey>
 #include <QDebug>
 #include <QDesktopWidget>
-#include <QHotkey>
 #include <QPushButton>
 #include <QSize>
 #include <QTimer>
-#include <QThread>
 #include <QLabel>
 #include <QPropertyAnimation>
 #include <QGraphicsOpacityEffect>
+#include <QFontDatabase>
+#include <QFont>
 #include <windows.h>
-#include <stdio.h>
-#include <tchar.h>
-#include <iostream>
 #include <psapi.h>
+#include "glyphicons.h"
 #include "eyexhost.h"
 #include "eyebutton.h"
 #include "bcihost.h"
+#include "interactor.h"
 
 
 #define MENU_START              0
 #define MENU_SPACE              260
 
-#define INTERACTOR_BACK         "interactor_BACK"
-#define INTERACTOR_PGUP         "interactor_PGUP"
-#define INTERACTOR_PGDN         "interactor_PGDN"
-#define INTERACTOR_NEWTAB       "interactor_NEWTAB"
-#define INTERACTOR_CLSTAB       "interactor_CLSTAB"
+#define ITK_ALT_LEFT            "ITK_ALT_LEFT"
+#define ITK_PAGEUP              "ITK_PAGEUP"
+#define ITK_PAGEDN              "ITK_PAGEDN"
+#define ITK_CTRL_T              "ITK_CTRL_T"
+#define ITK_CTRL_T_TAB_F4       "ITK_CTRL_T_TAB_F4"
+#define ITK_ESC                 "ITK_ESC"
+#define ITK_SPACE               "ITK_SPACE"
+#define ITK_N                   "ITK_N"
+#define ITK_P                   "ITK_P"
+#define ITK_F                   "ITK_F"
+
+#define ITR_PROFILE_NONE        0
+#define ITR_PROFILE_EXPLORER    1
+#define ITR_PROFILE_BROWSER     2
+#define ITR_PROFILE_BROWSER_FS  3
+#define ITR_PROFILE_VLC         4
+#define ITR_PROFILE_VLC_FS      5
+#define ITR_PROFILE_DEV         6
 
 
 namespace Ui {
 class MainWindow;
 }
-
-
-class InteractorParam {
-public:
-    int             x;
-    int             y;
-    int             width;
-    int             height;
-    QString         name;
-    ActivatorFlags  flags;
-
-    InteractorParam(int px, int py, int pwidth, int pheight, QString pname, ActivatorFlags pflags) {
-
-        x           = px;
-        y           = py;
-        width       = pwidth;
-        height      = pheight;
-        name        = pname;
-        flags       = pflags;
-    }
-};
 
 
 class MainWindow : public QMainWindow {
@@ -69,8 +62,18 @@ public:
                 ~MainWindow();
 
     EyeXHost    eyes;
-
     BciHost     brain;
+
+    enum InteractorPreset {
+        STYLE_MAIN = 1,
+        STYLE_MENU,
+        STYLE_BUTTON,
+        STYLE_INTERACTOR,
+        STYLE_INVISIBLE,
+        STYLE_SUCCESS,
+        STYLE_WARNING,
+        STYLE_DANGER,
+    };
 
     void        on_hotkey_pressed();
 
@@ -79,24 +82,26 @@ private:
 
     Ui::MainWindow  *ui;
 
+    QFont       iconFont;
     QTimer      systemTimer;
     QTimer      suppressTimer;
     bool        suppressEyes = false;
 
+    int         currentProfile;
     HWND        focusedWindow;
     QString     focusedExecutable;
     bool        focusedIsFullscreen;
 
-    bool        isProcessFullscreen( HWND window );
+    void        InitializeUi();
 
+    bool        isProcessFullscreen( HWND window );
     QString     GetProcessName( HWND handle );
     void        UpdateFocusedProcess();
 
-    void        InitializeUi();
-
-    void        AddInteractor( InteractorParam data );
+    void        AddInteractor( Interactor data );
     void        SetInteractorProfile( int profileId );
     void        ClearInteractorProfile();
+    Interactor::Params GetPresetInteractor( int styleId );
 
     RECT        GetScreenBounds( EyeButton * button );
     void        UpdateActivatableRegions();
@@ -111,7 +116,6 @@ private:
     void        ShowOp( bool visible );
     void        ShowEye( bool visible );
     void        ShowBci( bool visible );
-
 
     bool        isVisibleMenu();
     bool        isVisibleOp();

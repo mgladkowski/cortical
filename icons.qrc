@@ -1,20 +1,6 @@
 <RCC>
     <qresource prefix="/">
-        <file>dev/glyphicons-52-eye-open.png</file>
-        <file>dev/glyphicons-52-eye-open@2x.png</file>
-        <file>dev/glyphicons-154-unchecked.png</file>
-        <file>dev/glyphicons-170-record.png</file>
-        <file>dev/glyphicons-430-git-commit.png</file>
-        <file>dev/glyphicons-518-option-vertical.png</file>
-        <file>dev/glyphicons-519-option-horizontal.png</file>
-        <file>dev/glyphicons-594-voice.png</file>
-        <file>dev/glyphicons-594-voice@2x.png</file>
-        <file>dev/glyphicons-601-chevron-up.png</file>
-        <file>dev/glyphicons-608-modal-window.png</file>
-        <file>dev/glyphicons-722-mouse.png</file>
-        <file>dev/glyphicons-283-cardio.png</file>
-        <file>dev/glyphicons-283-cardio@2x.png</file>
-        <file>dev/glyphicons-440-wrench.png</file>
-        <file>dev/glyphicons-440-wrench@2x.png</file>
+        <file>FontAwesome.otf</file>
+        <file>Glyphicons-Regular.otf</file>
     </qresource>
 </RCC>

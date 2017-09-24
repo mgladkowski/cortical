@@ -6,43 +6,7 @@
 #include <QDebug>
 #include <QPushButton>
 #include <QTimer>
-
-
-enum ActivatorFlags {
-
-    ACTIVATE_INSTANT                = (1<<0),
-    ACTIVATE_QUICK                  = (1<<1),
-    ACTIVATE_NORMAL                 = (1<<2),
-    ACTIVATE_SLOW                   = (1<<3),
-    HIDE_PROGRESS_BAR               = (1<<4),
-    VERTICAL_PROGRESS_BAR           = (1<<5),
-    INTERACTOR_DEFAULT              = (1<<6),
-    INTERACTOR_DANGER               = (1<<7),
-    INTERACTOR_INVISIBLE            = (1<<8)
-};
-inline ActivatorFlags operator|(ActivatorFlags a, ActivatorFlags b) {
-    return static_cast<ActivatorFlags>(static_cast<int>(a) | static_cast<int>(b));
-}
-
-
-struct ActivatorParams {
-
-    bool        showHover;
-    bool        showEyeHover;
-    bool        showProgress;
-    bool        suppressEyes;
-    bool        clickOnActivation;
-    bool        suspendOnActivation;
-    bool        toggleActivation;
-    int         msecActivate;
-    int         msecRecovery;
-    QString     defaultBackground;
-    QString     hoverBackground;
-    QString     fixateBackground;
-    QString     activeBackground;
-    QString     currentBackground;
-};
-
+#include "interactor.h"
 
 class EyeButton : public QPushButton {
 
@@ -57,7 +21,6 @@ public:
     bool        isEyeHovered;
     bool        isActivated;
     bool        isInteractor;
-
     bool        showHover;
     bool        showEyeHover;
     bool        showProgress;
@@ -65,17 +28,16 @@ public:
     bool        clickOnActivation;
     bool        suspendOnActivation;
     bool        toggleActivation;
-
-    QString     defaultBackground;
-    QString     hoverBackground;
-    QString     fixateBackground;
-    QString     activeBackground;
-    QString     currentBackground;
-
+    QString     styleDefault;
+    QString     styleHover;
+    QString     styleFixate;
+    QString     styleActive;
+    QString     styleCurrent;
     int         msecActivate;
     int         msecRecovery;
 
-    void        setActivationType( ActivatorFlags flags );
+    void        setProperties( Interactor data );
+    void        setStyle( Interactor::Params data );
 
 
 protected:

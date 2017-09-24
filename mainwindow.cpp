@@ -15,15 +15,17 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     ui->setupUi(this);
 
-    eyes.Init( (HWND)this->winId() );
-
     InitializeUi();
+
+    SetInteractorProfile( ITR_PROFILE_BROWSER );
+
+    eyes.Init( (HWND)this->winId() );
 
     QObject::connect(
                 &systemTimer, SIGNAL(timeout()),
                 this, SLOT(on_SystemTimer())
     );
-    systemTimer.start( 2000 );
+    systemTimer.start( 1000 );
 
 }
 
@@ -36,24 +38,30 @@ MainWindow::~MainWindow() {
 
 void MainWindow::InitializeUi() {
 
+    // icons
+
+    QFontDatabase::addApplicationFont(":/Glyphicons-Regular.otf");
+    iconFont.setFamily("GLYPHICONS");
+    iconFont.setPixelSize(24);
 
     // sets position of main window objects
+
+    this->showFullScreen();
 
     QRect   desktopRect = QApplication::desktop()->availableGeometry(this);
     QPoint  center      = desktopRect.center();
 
-    this->showFullScreen();
-
     ui->frameScreen->move( 0,0 );
     ui->frameScreen->resize( desktopRect.width(), desktopRect.height() );
-
     int main_X = static_cast<int>( desktopRect.left() + (desktopRect.width() * 0.65) - 400 );
     int main_Y = static_cast<int>( desktopRect.bottom() - ui->widgetMain->height() );
-
     ui->widgetMain->move( main_X, main_Y) ;
 
-
     // connect events for each designer control
+
+    Interactor::Params mainStyle    = GetPresetInteractor(STYLE_MAIN);
+    Interactor::Params menuStyle    = GetPresetInteractor(STYLE_MENU);
+    Interactor::Params buttonStyle  = GetPresetInteractor(STYLE_BUTTON);
 
     QList<EyeButton*> list = this->findChildren<EyeButton *>();
     foreach(EyeButton *b, list) {
@@ -72,15 +80,22 @@ void MainWindow::InitializeUi() {
                         b, SIGNAL(ActivationEvent(int)),
                         this, SLOT(on_ActivationEvent(int))
             );
-            b->setActivationType( ActivatorFlags::ACTIVATE_NORMAL );
-            b->setFocusPolicy(Qt::NoFocus);
+            b->setFont(iconFont);
+            b->setStyle( buttonStyle );
         }
     }
 
-    ActivatorFlags flags = ActivatorFlags::ACTIVATE_QUICK | ActivatorFlags::HIDE_PROGRESS_BAR;
-    ui->buttonOp->setActivationType( flags );
-    ui->buttonEye->setActivationType( flags );
-    ui->buttonBci->setActivationType( flags );
+    ui->buttonMouse->setText( glyphicons_mouse );
+    ui->buttonMain->setText( glyphicons_chevron_up );
+    ui->buttonOp->setText( glyphicons_wrench );
+    ui->buttonEye->setText( glyphicons_eye_open );
+    ui->buttonBci->setText( glyphicons_cardio );
+
+    ui->buttonMouse->setStyle( mainStyle );
+    ui->buttonMain->setStyle( mainStyle );
+    ui->buttonOp->setStyle( menuStyle );
+    ui->buttonEye->setStyle( menuStyle );
+    ui->buttonBci->setStyle( menuStyle );
 
     // initial state
 
@@ -132,13 +147,29 @@ void MainWindow::UpdateActivatableRegions() {
 }
 
 
-void MainWindow::AddInteractor( InteractorParam data ) {
+void MainWindow::ClearInteractorProfile() {
+
+    QList<EyeButton*> list = this->findChildren<EyeButton *>();
+    foreach(EyeButton *b, list) {
+
+        if (b->isInteractor == true) {
+            delete b;
+        }
+    }
+
+    currentProfile = 0;
+
+    UpdateActivatableRegions();
+}
+
+
+void MainWindow::AddInteractor( Interactor data ) {
 
     EyeButton *button = new EyeButton(ui->frameScreen);
 
-    button->setObjectName(data.name);
-    button->setText(tr(""));
-    button->setGeometry( data.x, data.y, data.width, data.height );
+    iconFont.setPixelSize(48);
+    button->setFont( iconFont );
+    button->setProperties( data );
 
     QObject::connect(
                 button, SIGNAL(ActivationEvent(int)),
@@ -153,32 +184,97 @@ void MainWindow::AddInteractor( InteractorParam data ) {
                 button, SLOT(on_ActivationFocusEvent(int))
     );
 
-    button->setActivationType( data.flags );
-    button->setFocusPolicy(Qt::NoFocus);
-
-    this->layout()->addWidget( button );
+    layout()->addWidget( button );
 }
 
 
-void MainWindow::SetInteractorProfile( int profileId ) {
+void MainWindow::SetInteractorProfile( int profileId = ITR_PROFILE_NONE ) {
+
+    if (currentProfile == profileId) return;
 
     ClearInteractorProfile();
+    currentProfile = profileId;
 
     switch (profileId) {
-    case 1:
-        AddInteractor( InteractorParam(  900,   50,   200,  50, INTERACTOR_PGUP, ActivatorFlags::ACTIVATE_NORMAL | ActivatorFlags::INTERACTOR_INVISIBLE ) );
-        AddInteractor( InteractorParam(  900, 1000,   200,  50, INTERACTOR_PGDN, ActivatorFlags::ACTIVATE_NORMAL | ActivatorFlags::INTERACTOR_INVISIBLE ) );
-        AddInteractor( InteractorParam( 1700,  700,    50,  50, INTERACTOR_BACK, ActivatorFlags::ACTIVATE_NORMAL | ActivatorFlags::INTERACTOR_DEFAULT ) );
-        AddInteractor( InteractorParam( 1700,  800,    50,  50, INTERACTOR_NEWTAB, ActivatorFlags::ACTIVATE_NORMAL | ActivatorFlags::INTERACTOR_DEFAULT ) );
-        AddInteractor( InteractorParam( 1700,  900,    50,  50, INTERACTOR_CLSTAB, ActivatorFlags::ACTIVATE_SLOW | ActivatorFlags::INTERACTOR_DANGER ) );
+    case ITR_PROFILE_BROWSER:
+        AddInteractor(Interactor(  860,   50,  200,  50, ITK_PAGEUP,
+                                   glyphicons_chevron_up,
+                                   GetPresetInteractor(STYLE_INTERACTOR) ));
+
+        AddInteractor(Interactor(  860, 1000,  200,  70, ITK_PAGEDN,
+                                   glyphicons_chevron_down,
+                                   GetPresetInteractor(STYLE_INTERACTOR) ));
+
+        AddInteractor(Interactor( 1600,  700,   70,  70, ITK_ALT_LEFT,
+                                  glyphicons_arrow_left,
+                                  GetPresetInteractor(STYLE_INTERACTOR) ));
+
+        AddInteractor(Interactor( 1600,  800,   70,  70, ITK_CTRL_T,
+                                  glyphicons_more_windows,
+                                  GetPresetInteractor(STYLE_INTERACTOR) ));
+
+        AddInteractor(Interactor( 1600,  900,   70,  70, ITK_CTRL_T_TAB_F4,
+                                  glyphicons_remove,
+                                  GetPresetInteractor(STYLE_DANGER) ));
         break;
 
-    case 2:
-        AddInteractor( InteractorParam(  900,   50,   200,  50, INTERACTOR_PGUP, ActivatorFlags::ACTIVATE_NORMAL | ActivatorFlags::INTERACTOR_INVISIBLE) );
-        AddInteractor( InteractorParam(  900, 1000,   200,  50, INTERACTOR_PGDN, ActivatorFlags::ACTIVATE_NORMAL | ActivatorFlags::INTERACTOR_INVISIBLE) );
+    case ITR_PROFILE_BROWSER_FS:
+        AddInteractor(Interactor(  860,  600,  70,  70, ITK_SPACE,
+                                   glyphicons_pause,
+                                   GetPresetInteractor(STYLE_INTERACTOR) ));
+
+        AddInteractor(Interactor(  1060,  460,  70,  70, ITK_ESC,
+                                   glyphicons_fit_frame_to_image,
+                                   GetPresetInteractor(STYLE_INTERACTOR) ));
         break;
 
-    case 0:
+    case ITR_PROFILE_VLC:
+        AddInteractor(Interactor(  660,  600,  70,  70, ITK_P,
+                                   glyphicons_step_backward,
+                                   GetPresetInteractor(STYLE_INTERACTOR) ));
+
+        AddInteractor(Interactor(  860,  600,  70,  70, ITK_SPACE,
+                                   glyphicons_pause,
+                                   GetPresetInteractor(STYLE_INTERACTOR) ));
+
+        AddInteractor(Interactor(  1060,  600,  70,  70, ITK_N,
+                                   glyphicons_step_forward,
+                                   GetPresetInteractor(STYLE_INTERACTOR) ));
+
+        AddInteractor(Interactor(  860,  460,  70,  70, ITK_F,
+                                   glyphicons_fit_image_to_frame,
+                                   GetPresetInteractor(STYLE_INTERACTOR) ));
+        break;
+
+    case ITR_PROFILE_VLC_FS:
+        AddInteractor(Interactor(  660,  600,  70,  70, ITK_P,
+                                   glyphicons_step_backward,
+                                   GetPresetInteractor(STYLE_INTERACTOR) ));
+
+        AddInteractor(Interactor(  860,  600,  70,  70, ITK_SPACE,
+                                   glyphicons_pause,
+                                   GetPresetInteractor(STYLE_INTERACTOR) ));
+
+        AddInteractor(Interactor(  1060,  600,  70,  70, ITK_N,
+                                   glyphicons_step_forward,
+                                   GetPresetInteractor(STYLE_INTERACTOR) ));
+
+        AddInteractor(Interactor(  860,  460,  70,  70, ITK_ESC,
+                                   glyphicons_fit_frame_to_image,
+                                   GetPresetInteractor(STYLE_INTERACTOR) ));
+        break;
+
+    case ITR_PROFILE_DEV:
+        AddInteractor(Interactor(  860,   50,  200,  50, ITK_PAGEUP,
+                                   glyphicons_chevron_up,
+                                   GetPresetInteractor(STYLE_INTERACTOR) ));
+
+        AddInteractor(Interactor(  860, 1000,  200,  50, ITK_PAGEDN,
+                                   glyphicons_chevron_down,
+                                   GetPresetInteractor(STYLE_INTERACTOR) ));
+        break;
+
+    case ITR_PROFILE_NONE:
     default:
         break;
     }
@@ -187,17 +283,165 @@ void MainWindow::SetInteractorProfile( int profileId ) {
 }
 
 
-void MainWindow::ClearInteractorProfile() {
+Interactor::Params MainWindow::GetPresetInteractor( int styleId = 0 ) {
 
-    QList<EyeButton*> list = this->findChildren<EyeButton *>();
-    foreach(EyeButton *b, list) {
+    Interactor::Params i;
 
-        if (b->isInteractor == true) {
-            delete b;
-        }
+    i.isInteractor          = false;
+    i.showHover             = true;
+    i.showEyeHover          = true;
+    i.showProgress          = true;
+    i.suppressEyes          = false;
+    i.clickOnActivation     = true;
+    i.suspendOnActivation   = true;
+    i.toggleActivation      = false;
+    i.msecActivate          = 1200;
+    i.msecRecovery          = 500;
+    i.styleDefault          = "background:rgba(0,0,0,0.2); border:1px solid rgba(0,0,0,0.2); color:rgba(30,136,229,0.5);";
+    i.styleFixate           = "background:qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop: 0 rgba(41,182,246,0.2), stop: %1 rgba(0,0,0,0.2) );border:3px solid rgba(41,182,246,0.6); color:rgba(41,182,246,1);";
+    i.styleHover            = "background:rgba(41,182,246,0.2); border:3px solid rgba(41,182,246,0.6); color:rgba(41,182,246,1);";
+    i.styleActive           = "background:rgba(41,182,246,0.2); border:3px solid rgba(41,182,246,0.6); color:rgba(41,182,246,1);";
+
+    switch (styleId) {
+    case STYLE_MAIN:
+        i.styleDefault          = "background:rgba(0,0,0,0.01); border:0px solid rgba(0,0,0,0); color:rgba(30,136,229,0.5);";
+        i.styleFixate           = "background:qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop: 0 rgba(41,182,246,0.2), stop: %1 rgba(0,0,0,0.01) );border:0px solid rgba(41,182,246,0.6); color:rgba(41,182,246,1);";
+        break;
+
+    case STYLE_MENU:
+
+        i.suspendOnActivation   = true;
+        i.toggleActivation      = true;
+        i.msecActivate          = 400;
+        i.msecRecovery          = 400;
+        break;
+
+    case STYLE_INTERACTOR:
+
+        i.isInteractor          = true;
+        i.showHover             = false;
+        i.styleDefault          = "background:rgba(0,0,0,0.01); border:0px solid rgba(0,0,0,0); color:rgba(30,136,229,0.5);";
+        i.styleFixate           = "background:qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop: 0 rgba(41,182,246,0.2), stop: %1 rgba(0,0,0,0.01) );border:0px solid rgba(41,182,246,0.6); color:rgba(41,182,246,1);";
+        break;
+
+    case STYLE_INVISIBLE:
+
+        i.isInteractor          = true;
+        i.showHover             = false;
+        i.showEyeHover          = false;
+        i.showProgress          = false;
+        i.toggleActivation      = false;
+        i.styleDefault          = "background:rgba(0,0,0,0.01); border:0px solid rgba(0,0,0,0); color:rgba(30,136,229,0.5);";
+        i.styleFixate           = "background:qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop: 0 rgba(41,182,246,0.2), stop: %1 rgba(0,0,0,0.01) );border:0px solid rgba(41,182,246,0.6); color:rgba(41,182,246,1);";
+        break;
+
+    case STYLE_SUCCESS:
+
+        i.isInteractor          = true;
+        i.showHover             = false;
+        i.styleDefault          = "background:rgba(0,0,0,0.01); border:0px solid rgba(0,0,0,0); color:rgba(30,136,229,0.5);";
+        i.styleFixate           = "background:qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop: 0 rgba(41,182,246,0.2), stop: %1 rgba(0,0,0,0.01) );border:0px solid rgba(41,182,246,0.6); color:rgba(41,182,246,1);";
+        break;
+
+    case STYLE_WARNING:
+
+        i.isInteractor          = true;
+        i.showHover             = false;
+        i.msecActivate          = 2500;
+        i.msecRecovery          = 500;
+        i.styleDefault          = "background:rgba(0,0,0,0.01); border:0px solid rgba(0,0,0,0); color:rgba(30,136,229,0.5);";
+        i.styleFixate           = "background:qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop: 0 rgba(41,182,246,0.2), stop: %1 rgba(0,0,0,0.01) );border:0px solid rgba(41,182,246,0.6); color:rgba(41,182,246,1);";
+        break;
+
+    case STYLE_DANGER:
+
+        i.isInteractor          = true;
+        i.showHover             = false;
+        i.msecActivate          = 2500;
+        i.msecRecovery          = 500;
+        i.styleDefault          = "background:rgba(0,0,0,0.01); border:1px solid rgba(0,0,0,0.01); color:rgba(255,0,0,0.5);";
+        i.styleFixate           = "background:qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop: 0 rgba(255,0,0,0.2), stop: %1 rgba(0,0,0,0.2) );border:3px solid rgba(255,0,0,0.6); color:rgba(255,0,0,1);";
+        i.styleHover            = "background:rgba(255,0,0,0.2); border:3px solid rgba(255,0,0,0.6); color:rgba(255,0,0,1);";
+        i.styleActive           = "background:rgba(255,0,0,0.2); border:3px solid rgba(255,0,0,0.6); color:rgba(255,0,0,1);";
+        break;
+
+    case STYLE_BUTTON:
+    default:
+        break;
+    }
+    return i;
+}
+
+
+QString MainWindow::GetProcessName( HWND window ) {
+
+    DWORD   processId;
+
+    GetWindowThreadProcessId(window , &processId);
+
+    TCHAR buffer[MAX_PATH] = TEXT("unknown");
+
+    HANDLE hProcess = OpenProcess( PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, processId );
+
+    if (NULL != hProcess ) {
+
+        GetModuleFileNameEx( hProcess, NULL, buffer, MAX_PATH );
     }
 
-    UpdateActivatableRegions();
+    QString result = QString::fromStdWString( buffer );
+
+    CloseHandle( hProcess );
+
+    return result;
+
+    // this is how you would invoke an external DLL function, in this case lock the workstation
+    //QProcess::execute("rundll32", QStringList("USER32.DLL,LockWorkStation"));
+}
+
+
+bool MainWindow::isProcessFullscreen( HWND window ) {
+
+    RECT a, b;
+    GetWindowRect(window, &a);
+    GetWindowRect(GetDesktopWindow(), &b);
+    return (a.left   == b.left  &&
+            a.top    == b.top   &&
+            a.right  == b.right &&
+            a.bottom == b.bottom);
+}
+
+
+void MainWindow::UpdateFocusedProcess() {
+
+    if (focusedExecutable == "C:\\Windows\\explorer.exe") {
+
+        SetInteractorProfile( ITR_PROFILE_EXPLORER );
+
+    } else if (focusedExecutable == "C:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe") {
+
+        SetInteractorProfile( focusedIsFullscreen
+                              ? ITR_PROFILE_BROWSER_FS
+                              : ITR_PROFILE_BROWSER );
+
+    } else if (focusedExecutable == "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe") {
+
+        SetInteractorProfile( focusedIsFullscreen
+                              ? ITR_PROFILE_BROWSER_FS
+                              : ITR_PROFILE_BROWSER );
+
+    } else if (focusedExecutable == "C:\\Qt\\Tools\\QtCreator\\bin\\qtcreator.exe") {
+
+        SetInteractorProfile( ITR_PROFILE_DEV );
+
+    } else if (focusedExecutable == "C:\\Program Files (x86)\\VideoLAN\\VLC\\vlc.exe") {
+
+        SetInteractorProfile( focusedIsFullscreen
+                              ? ITR_PROFILE_VLC_FS
+                              : ITR_PROFILE_VLC );
+    } else {
+
+        SetInteractorProfile( ITR_PROFILE_NONE );
+    }
 }
 
 
@@ -271,7 +515,7 @@ void MainWindow::on_InteractorActivated() {
     ip.ki.time = 0;
     ip.ki.dwExtraInfo = 0;
 
-    if (senderName == INTERACTOR_BACK) {
+    if (senderName == ITK_ALT_LEFT) {
 
         // send ALT + LEFT
 
@@ -295,7 +539,7 @@ void MainWindow::on_InteractorActivated() {
         SendInput(key_count, (LPINPUT)input, sizeof(INPUT));
 
     }
-    if (senderName == INTERACTOR_PGUP) {
+    if (senderName == ITK_PAGEUP) {
 
         // send PAGEUP
 
@@ -306,7 +550,7 @@ void MainWindow::on_InteractorActivated() {
         SendInput(1, &ip, sizeof(INPUT));
 
     }
-    if (senderName == INTERACTOR_PGDN) {
+    if (senderName == ITK_PAGEDN) {
 
         // send PAGEDOWN
 
@@ -317,7 +561,7 @@ void MainWindow::on_InteractorActivated() {
         SendInput(1, &ip, sizeof(INPUT));
 
     }
-    if (senderName == INTERACTOR_NEWTAB) {
+    if (senderName == ITK_CTRL_T) {
 
         // send CTRL + (T, TAB, F4)
 
@@ -355,7 +599,7 @@ void MainWindow::on_InteractorActivated() {
         SendInput(key_count, (LPINPUT)input, sizeof(INPUT));
 
     }
-    if (senderName == INTERACTOR_CLSTAB) {
+    if (senderName == ITK_CTRL_T_TAB_F4) {
 
         // send CTRL + F4
 
@@ -378,7 +622,61 @@ void MainWindow::on_InteractorActivated() {
         input[3].ki.wScan = input[1].ki.wScan;
         SendInput(key_count, (LPINPUT)input, sizeof(INPUT));
     }
+    if (senderName == ITK_ESC) {
 
+        // send ESC
+
+        ip.ki.wVk = VK_ESCAPE;
+        ip.ki.dwFlags = 0;
+        SendInput(1, &ip, sizeof(INPUT));
+        ip.ki.dwFlags = KEYEVENTF_KEYUP;
+        SendInput(1, &ip, sizeof(INPUT));
+
+    }
+    if (senderName == ITK_SPACE) {
+
+        // send SPACE
+
+        ip.ki.wVk = VK_SPACE;
+        ip.ki.dwFlags = 0;
+        SendInput(1, &ip, sizeof(INPUT));
+        ip.ki.dwFlags = KEYEVENTF_KEYUP;
+        SendInput(1, &ip, sizeof(INPUT));
+
+    }
+    if (senderName == ITK_F) {
+
+        // send f
+
+        ip.ki.wVk = 0x46;
+        ip.ki.dwFlags = 0;
+        SendInput(1, &ip, sizeof(INPUT));
+        ip.ki.dwFlags = KEYEVENTF_KEYUP;
+        SendInput(1, &ip, sizeof(INPUT));
+
+    }
+    if (senderName == ITK_N) {
+
+        // send n
+
+        ip.ki.wVk = 0x4E;
+        ip.ki.dwFlags = 0;
+        SendInput(1, &ip, sizeof(INPUT));
+        ip.ki.dwFlags = KEYEVENTF_KEYUP;
+        SendInput(1, &ip, sizeof(INPUT));
+
+    }
+    if (senderName == ITK_P) {
+
+        // send p
+
+        ip.ki.wVk = 0x50;
+        ip.ki.dwFlags = 0;
+        SendInput(1, &ip, sizeof(INPUT));
+        ip.ki.dwFlags = KEYEVENTF_KEYUP;
+        SendInput(1, &ip, sizeof(INPUT));
+
+    }
 }
 
 
@@ -746,69 +1044,3 @@ void MainWindow::on_buttonBci_clicked() {
 
     SlideMenu(3);
 }
-
-
-QString MainWindow::GetProcessName( HWND window ) {
-
-    DWORD   processId;
-
-    GetWindowThreadProcessId(window , &processId);
-
-    TCHAR buffer[MAX_PATH] = TEXT("unknown");
-
-    HANDLE hProcess = OpenProcess( PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, processId );
-
-    if (NULL != hProcess ) {
-
-        GetModuleFileNameEx( hProcess, NULL, buffer, MAX_PATH );
-    }
-
-    QString result = QString::fromStdWString( buffer );
-
-    CloseHandle( hProcess );
-
-    return result;
-
-    // this is how you would invoke an external DLL function, in this case lock the workstation
-    //QProcess::execute("rundll32", QStringList("USER32.DLL,LockWorkStation"));
-}
-
-
-bool MainWindow::isProcessFullscreen( HWND window ) {
-
-    RECT a, b;
-    GetWindowRect(window, &a);
-    GetWindowRect(GetDesktopWindow(), &b);
-    return (a.left   == b.left  &&
-            a.top    == b.top   &&
-            a.right  == b.right &&
-            a.bottom == b.bottom);
-}
-
-
-void MainWindow::UpdateFocusedProcess() {
-
-    qDebug() << qPrintable(focusedExecutable) << focusedIsFullscreen;
-
-    if (focusedExecutable == "C:\\Windows\\explorer.exe") {
-
-        SetInteractorProfile(0);
-
-    } else if (focusedExecutable == "C:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe") {
-
-        SetInteractorProfile(1);
-
-    } else if (focusedExecutable == "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe") {
-
-        SetInteractorProfile(1);
-
-    } else if (focusedExecutable == "C:\\Qt\\Tools\\QtCreator\\bin\\qtcreator.exe") {
-
-        SetInteractorProfile(2);
-
-    } else if (focusedExecutable == "C:\\Program Files (x86)\\VideoLAN\\VLC\\vlc.exe") {
-
-        SetInteractorProfile(0);
-    }
-}
-
