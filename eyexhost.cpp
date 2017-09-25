@@ -278,7 +278,7 @@ void EyeXHost::HandleEvent(TX_CONSTHANDLE hAsyncData) {
 
     if (txGetEventBehavior(hEvent, &hActivatable, TX_BEHAVIORTYPE_ACTIVATABLE) == TX_RESULT_OK) {
 
-        int         interactorId;
+        int         interactorId = 0;
         const int   bufferSize = 20;
         TX_CHAR     stringBuffer[bufferSize];
         TX_SIZE     idLength(bufferSize);

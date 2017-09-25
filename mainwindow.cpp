@@ -17,8 +17,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     InitializeUi();
 
-    SetInteractorProfile( ITP_BROWSER );
-
     eyes.Init( (HWND)this->winId() );
 
     QObject::connect(
