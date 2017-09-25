@@ -5,6 +5,7 @@ EyeXHost::EyeXHost(QObject *parent) : QObject(parent),
     _hWnd(nullptr),
     _context(TX_EMPTY_HANDLE),
     _connectionStateChangedTicket(0),
+    _stateHandlerTicket(0),
     _queryHandlerTicket(0),
     _eventHandlerTicket(0),
     _gazeInteractorId((char *)"100"),
@@ -50,6 +51,7 @@ void EyeXHost::Init(HWND hWnd) {
     success &= txCreateContext(&_context, TX_FALSE) == TX_RESULT_OK;
     success &= InitializeGlobalInteractorSnapshot();
     success &= RegisterConnectionStateChangedHandler();
+    success &= RegisterStateHandler();
     success &= RegisterQueryHandler();
     success &= RegisterEventHandler();
 
@@ -74,7 +76,6 @@ void EyeXHost::Init(HWND hWnd) {
                 this, SIGNAL(GazeEvent(int, int)),
                 this, SLOT(OnGazeEvent(int, int))
     );
-
 }
 
 
@@ -95,7 +96,7 @@ bool EyeXHost::InitializeGlobalInteractorSnapshot() {
     success = txCreateGlobalInteractorSnapshot(_context, _gazeInteractorId, &_gazeInteractorSnapshot, &hInteractor) == TX_RESULT_OK;
 
     success &= txCreateGazePointDataBehavior(hInteractor, &paramsGaze) == TX_RESULT_OK;
-    success &= txCreateFixationDataBehavior(hInteractor, &paramsFixation) == TX_RESULT_OK;
+    //success &= txCreateFixationDataBehavior(hInteractor, &paramsFixation) == TX_RESULT_OK;
 
     txReleaseObject(&hInteractor);
 
@@ -109,6 +110,16 @@ bool EyeXHost::RegisterConnectionStateChangedHandler() {
         static_cast<EyeXHost*>(userParam)->OnEngineConnectionStateChanged(connectionState);
     };
     bool success = txRegisterConnectionStateChangedHandler(_context, &_connectionStateChangedTicket, connectionStateChangedTrampoline, this) == TX_RESULT_OK;
+    return success;
+}
+
+
+bool EyeXHost::RegisterStateHandler() {
+
+    auto stateChangedTrampoline = [](TX_CONSTHANDLE hAsyncData, TX_USERPARAM userParam) {
+        static_cast<EyeXHost*>(userParam)->OnEngineStateChanged(hAsyncData);
+    };
+    bool success = txRegisterStateChangedHandler(_context, &_stateHandlerTicket, TX_STATEPATH_USERPRESENCE, stateChangedTrampoline, this) == TX_RESULT_OK;
     return success;
 }
 
@@ -173,8 +184,25 @@ void EyeXHost::OnEngineConnectionStateChanged(TX_CONNECTIONSTATE connectionState
 }
 
 
-void EyeXHost::HandleQuery(TX_CONSTHANDLE hAsyncData) {
+void EyeXHost::OnEngineStateChanged(TX_CONSTHANDLE hAsyncData) {
 
+    TX_RESULT result = TX_RESULT_UNKNOWN;
+    TX_HANDLE hStateBag = TX_EMPTY_HANDLE;
+    TX_INTEGER wtf;
+
+    if (txGetAsyncDataResultCode(hAsyncData, &result) == TX_RESULT_OK &&
+        txGetAsyncDataContent(hAsyncData, &hStateBag) == TX_RESULT_OK) {
+
+        bool success = (txGetStateValueAsInteger(hStateBag, TX_STATEPATH_USERPRESENCE, &_presenceData) == TX_RESULT_OK);
+        if (success) {
+            emit UserPresenceChanged( (_presenceData == TX_USERPRESENCE_PRESENT) );
+        }
+        txReleaseObject(&hStateBag);
+    }
+}
+
+
+void EyeXHost::HandleQuery(TX_CONSTHANDLE hAsyncData) {
 
     TX_HANDLE hQuery(TX_EMPTY_HANDLE);
     txGetAsyncDataContent(hAsyncData, &hQuery);
@@ -200,8 +228,6 @@ void EyeXHost::HandleQuery(TX_CONSTHANDLE hAsyncData) {
     txCreateSnapshotForQuery(hQuery, &hSnapshot);
 
     if ( QueryIsForWindowId(hQuery, windowId) ) {
-
-        //qDebug() << "query " << (INT)pX << " " << (INT)pY;
 
         // define options for our activatable regions: yes, we want tentative focus events
 
@@ -383,8 +409,6 @@ void EyeXHost::TriggerActivationModeOn()
 }
 
 
-/* Handles an event from the gaze data stream
- */
 void EyeXHost::OnGazeEvent(int X, int Y) {
 
     if (mouse == Mouse::Off || X < 1 || Y < 1) return;
@@ -422,8 +446,6 @@ void EyeXHost::OnGazeEvent(int X, int Y) {
 }
 
 
-/* Handles an event from the fixation data stream
- */
 void EyeXHost::OnFixationDataEvent() {
 
 }
@@ -451,5 +473,3 @@ void EyeXHost::OnActivated(TX_HANDLE hBehavior, int interactorId) {
 
     emit ActivationEvent( interactorId );
 }
-
-

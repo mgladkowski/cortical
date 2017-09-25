@@ -21,7 +21,10 @@
 #include "eyebutton.h"
 #include "bcihost.h"
 #include "interactor.h"
+#include "commctrl.h"
 
+#include <stdio.h>
+#include <shellapi.h>
 
 #define MENU_START              0
 #define MENU_SPACE              260
@@ -44,6 +47,10 @@
 #define ITP_VLC         4
 #define ITP_VLC_FS      5
 #define ITP_DEV         6
+
+
+BOOL CALLBACK EnumChildProc(HWND hwnd, LPARAM lParam);
+void TaskBarTest();
 
 
 namespace Ui {
@@ -91,12 +98,14 @@ private:
     HWND        focusedWindow;
     QString     focusedExecutable;
     bool        focusedIsFullscreen;
+    bool        userPresent;
 
     void        InitializeUi();
 
     bool        isProcessFullscreen( HWND window );
     QString     GetProcessName( HWND handle );
     void        UpdateFocusedProcess();
+    void        UpdateStartMenu();
 
     void        AddInteractor( Interactor data );
     void        SetInteractorProfile( int profileId );
@@ -111,12 +120,14 @@ private:
     void        ToggleBrain();
     void        ToggleMenu();
 
+    void        ShowAll( bool visible );
     void        SlideMenu( int position );
     void        ShowMenu( bool visible );
     void        ShowOp( bool visible );
     void        ShowEye( bool visible );
     void        ShowBci( bool visible );
 
+    bool        isVisibleApp();
     bool        isVisibleMenu();
     bool        isVisibleOp();
     bool        isVisibleEye();
@@ -129,11 +140,14 @@ public slots:
 
     void        on_ActivationEvent( int interactorId );
     void        on_AnimationFinished();
+    void        on_FadeAllFinished();
     void        on_FadeMenuFinished();
     void        on_FadeOpsFinished();
     void        on_FadeEyeFinished();
     void        on_FadeBciFinished();
     void        on_SystemTimer();
+    void        on_UserPresenceChanged( bool present );
+
 
 private slots:
 

@@ -56,6 +56,8 @@ public:
     int     ema_size;
     float   ema_multiplier;
 
+    bool    userPresent;
+
     void    Init(HWND hWnd);
     bool    IsFunctional();
     void    SetActivatableRegions(const std::vector<ActivatableRegion> & regions);
@@ -68,21 +70,27 @@ private:
     HWND                _hWnd;
     TX_CONTEXTHANDLE    _context;
     TX_TICKET           _connectionStateChangedTicket;
+    TX_TICKET           _stateHandlerTicket;
     TX_TICKET           _queryHandlerTicket;
     TX_TICKET           _eventHandlerTicket;
     TX_STRING           _gazeInteractorId;
     TX_HANDLE           _gazeInteractorSnapshot;
     State               _state;
+    TX_INTEGER          _presenceData;
+
     std::vector<ActivatableRegion> _regions;
 
     bool InitializeGlobalInteractorSnapshot();
     bool RegisterConnectionStateChangedHandler();
+    bool RegisterStateHandler();
     bool RegisterQueryHandler();
     bool RegisterEventHandler();
 
     void OnEngineConnectionStateChanged(TX_CONNECTIONSTATE connectionState);
+    void OnEngineStateChanged(TX_CONSTHANDLE hAsyncData );
     void SetState(State state);
 
+    void HandleState(TX_HANDLE hStateBag);
     void HandleQuery(TX_CONSTHANDLE hAsyncData);
     void HandleEvent(TX_CONSTHANDLE hAsyncData);
     void OnActivationFocusChanged(TX_HANDLE hBehavior, int interactorId);
@@ -96,20 +104,16 @@ private:
 signals:
 
     void ConnectionStateChanged();
-
-    void GazeEvent(int X, int Y);
-
+    void GazeEvent( int X, int Y );
     void FixationEvent();
-
     void ActivationEvent(int interactorId);
-
     void ActivationFocusEvent(int interactorId);
+    void UserPresenceChanged( bool present );
 
 
 public slots:
 
     void OnGazeEvent(int X, int Y);
-
     void OnFixationDataEvent();
 
 };

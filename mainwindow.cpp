@@ -22,11 +22,15 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     eyes.Init( (HWND)this->winId() );
 
     QObject::connect(
+                &eyes, SIGNAL(UserPresenceChanged(bool)),
+                this, SLOT(on_UserPresenceChanged(bool))
+    );
+
+    QObject::connect(
                 &systemTimer, SIGNAL(timeout()),
                 this, SLOT(on_SystemTimer())
     );
     systemTimer.start( 1000 );
-
 }
 
 
@@ -167,8 +171,6 @@ void MainWindow::AddInteractor( Interactor data ) {
 
     EyeButton *button = new EyeButton(ui->frameScreen);
 
-    iconFont.setPixelSize(48);
-    button->setFont( iconFont );
     button->setProperties( data );
 
     QObject::connect(
@@ -184,7 +186,7 @@ void MainWindow::AddInteractor( Interactor data ) {
                 button, SLOT(on_ActivationFocusEvent(int))
     );
 
-    layout()->addWidget( button );
+    button->show();
 }
 
 
@@ -205,11 +207,11 @@ void MainWindow::SetInteractorProfile( int profileId = ITP_NONE ) {
                                    glyphicons_chevron_down,
                                    GetPresetInteractor(STYLE_INTERACTOR) ));
 
-        AddInteractor(Interactor( 1600,  700,   70,  70, ITK_ALT_LEFT,
+        AddInteractor(Interactor( 1600,  500,   70,  70, ITK_ALT_LEFT,
                                   glyphicons_arrow_left,
                                   GetPresetInteractor(STYLE_INTERACTOR) ));
 
-        AddInteractor(Interactor( 1600,  800,   70,  70, ITK_CTRL_T,
+        AddInteractor(Interactor( 1600,  700,   70,  70, ITK_CTRL_T,
                                   glyphicons_more_windows,
                                   GetPresetInteractor(STYLE_INTERACTOR) ));
 
@@ -219,53 +221,53 @@ void MainWindow::SetInteractorProfile( int profileId = ITP_NONE ) {
         break;
 
     case ITP_BROWSER_FS:
-        AddInteractor(Interactor(  860,  600,  70,  70, ITK_SPACE,
+        AddInteractor(Interactor(  860,  700,  70,  70, ITK_SPACE,
                                    glyphicons_pause,
                                    GetPresetInteractor(STYLE_INTERACTOR) ));
 
-        AddInteractor(Interactor(  1060,  460,  70,  70, ITK_ESC,
+        AddInteractor(Interactor(  1060,  700,  70,  70, ITK_ESC,
                                    glyphicons_fit_frame_to_image,
                                    GetPresetInteractor(STYLE_INTERACTOR) ));
         break;
 
     case ITP_VLC:
-        AddInteractor(Interactor(  660,  600,  70,  70, ITK_P,
+        AddInteractor(Interactor(  660,  700,  70,  70, ITK_P,
                                    glyphicons_step_backward,
                                    GetPresetInteractor(STYLE_INTERACTOR) ));
 
-        AddInteractor(Interactor(  860,  600,  70,  70, ITK_SPACE,
+        AddInteractor(Interactor(  860,  700,  70,  70, ITK_SPACE,
                                    glyphicons_pause,
                                    GetPresetInteractor(STYLE_INTERACTOR) ));
 
-        AddInteractor(Interactor(  1060,  600,  70,  70, ITK_N,
+        AddInteractor(Interactor(  1060,  700,  70,  70, ITK_N,
                                    glyphicons_step_forward,
                                    GetPresetInteractor(STYLE_INTERACTOR) ));
 
-        AddInteractor(Interactor(  860,  460,  70,  70, ITK_F,
+        AddInteractor(Interactor(  1260,  700,  70,  70, ITK_F,
                                    glyphicons_fit_image_to_frame,
                                    GetPresetInteractor(STYLE_INTERACTOR) ));
         break;
 
     case ITP_VLC_FS:
-        AddInteractor(Interactor(  660,  600,  70,  70, ITK_P,
+        AddInteractor(Interactor(  660,  700,  70,  70, ITK_P,
                                    glyphicons_step_backward,
                                    GetPresetInteractor(STYLE_INTERACTOR) ));
 
-        AddInteractor(Interactor(  860,  600,  70,  70, ITK_SPACE,
+        AddInteractor(Interactor(  860,  700,  70,  70, ITK_SPACE,
                                    glyphicons_pause,
                                    GetPresetInteractor(STYLE_INTERACTOR) ));
 
-        AddInteractor(Interactor(  1060,  600,  70,  70, ITK_N,
+        AddInteractor(Interactor(  1060,  700,  70,  70, ITK_N,
                                    glyphicons_step_forward,
                                    GetPresetInteractor(STYLE_INTERACTOR) ));
 
-        AddInteractor(Interactor(  860,  460,  70,  70, ITK_ESC,
+        AddInteractor(Interactor(  1260,  700,  70,  70, ITK_ESC,
                                    glyphicons_fit_frame_to_image,
                                    GetPresetInteractor(STYLE_INTERACTOR) ));
         break;
 
     case ITP_DEV:
-        AddInteractor(Interactor(  860,   50,  200,  50, ITK_PAGEUP,
+        AddInteractor(Interactor(  860,   60,  200,  50, ITK_PAGEUP,
                                    glyphicons_chevron_up,
                                    GetPresetInteractor(STYLE_INTERACTOR) ));
 
@@ -297,8 +299,8 @@ Interactor::Params MainWindow::GetPresetInteractor( int styleId = 0 ) {
     i.toggleActivation      = false;
     i.msecActivate          = 1200;
     i.msecRecovery          = 500;
-    i.styleDefault          = "background:rgba(0,0,0,0.2); border:1px solid rgba(0,0,0,0.2); color:rgba(30,136,229,0.5);";
-    i.styleFixate           = "background:qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop: 0 rgba(41,182,246,0.2), stop: %1 rgba(0,0,0,0.2) );border:3px solid rgba(41,182,246,0.6); color:rgba(41,182,246,1);";
+    i.styleDefault          = "background:rgba(0,0,0,0.6); border:1px solid rgba(0,0,0,0.8); color:rgba(30,136,229,1);";
+    i.styleFixate           = "background:qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop: 0 rgba(41,182,246,0.2), stop: %1 rgba(0,0,0,0.6) );border:3px solid rgba(41,182,246,0.8); color:rgba(41,182,246,1);";
     i.styleHover            = "background:rgba(41,182,246,0.2); border:3px solid rgba(41,182,246,0.6); color:rgba(41,182,246,1);";
     i.styleActive           = "background:rgba(41,182,246,0.2); border:3px solid rgba(41,182,246,0.6); color:rgba(41,182,246,1);";
 
@@ -311,7 +313,8 @@ Interactor::Params MainWindow::GetPresetInteractor( int styleId = 0 ) {
     case STYLE_MENU:
 
         i.suspendOnActivation   = true;
-        i.toggleActivation      = true;
+        i.toggleActivation      = false;
+        i.showProgress          = true;
         i.msecActivate          = 400;
         i.msecRecovery          = 400;
         break;
@@ -445,6 +448,46 @@ void MainWindow::UpdateFocusedProcess() {
 }
 
 
+void MainWindow::UpdateStartMenu() {
+
+    QString strClass = "Shell_TrayWnd";
+    HWND hShell = FindWindow( (LPCWSTR)(const wchar_t*)strClass.utf16(), NULL );
+
+    strClass = "Start";
+    HWND hStart = FindWindowEx(hShell, NULL, (LPCWSTR)(const wchar_t*)strClass.utf16(), NULL );
+
+    strClass = "ReBarWindow32";
+    HWND h1 = FindWindowEx(hShell, NULL, (LPCWSTR)(const wchar_t*)strClass.utf16(), NULL );
+
+    strClass = "MSTaskSwWClass";
+    HWND h2 = FindWindowEx(h1, NULL, (LPCWSTR)(const wchar_t*)strClass.utf16(), NULL );
+
+    strClass = "MSTaskListWClass";
+    HWND hTask = FindWindowEx(h2, NULL, (LPCWSTR)(const wchar_t*)strClass.utf16(), NULL );
+    qDebug() << hTask;
+
+//    int count = SendMessage( hStart, TB_BUTTONCOUNT, 0, 0 );
+//    qDebug() << count;
+    //BOOL foundChild = EnumChildWindows( hTask, (WNDENUMPROC)EnumChildProc, 0);
+}
+
+
+BOOL CALLBACK EnumChildProc(HWND hwnd, LPARAM lParam) {
+
+     qDebug() << qPrintable("hwnd_Child = ") << hwnd;
+     return true;
+}
+
+
+void TaskBarTest() {
+
+    APPBARDATA abd = { sizeof(abd) };
+    UINT uState = (UINT)SHAppBarMessage(ABM_GETSTATE, &abd);
+    qDebug() << QString((uState & ABS_ALWAYSONTOP) ? "always on top" : "not always on top");
+    qDebug() << QString((uState & ABS_AUTOHIDE) ? "auto hide" : "not auto hide");
+}
+
+
 void MainWindow::on_AnimationFinished() {
 
     UpdateActivatableRegions();
@@ -456,12 +499,21 @@ void MainWindow::on_ActivationEvent( int interactorId ) {
 }
 
 
+void MainWindow::on_FadeAllFinished() {
+
+    ui->frameScreen->setGraphicsEffect(NULL);
+    UpdateActivatableRegions();
+}
+
+
 void MainWindow::on_FadeMenuFinished() {
 
     ui->frameMenu->hide();
     ui->frameOp->hide();
     ui->frameEye->hide();
     ui->frameBci->hide();
+
+    ui->frameMenu->setGraphicsEffect(NULL);
 
     UpdateActivatableRegions();
 }
@@ -470,6 +522,7 @@ void MainWindow::on_FadeMenuFinished() {
 void MainWindow::on_FadeOpsFinished() {
 
     ui->frameOp->hide();
+    ui->frameOp->setGraphicsEffect(NULL);
     UpdateActivatableRegions();
 }
 
@@ -477,6 +530,7 @@ void MainWindow::on_FadeOpsFinished() {
 void MainWindow::on_FadeEyeFinished() {
 
     ui->frameEye->hide();
+    ui->frameEye->setGraphicsEffect(NULL);
     UpdateActivatableRegions();
 }
 
@@ -484,6 +538,7 @@ void MainWindow::on_FadeEyeFinished() {
 void MainWindow::on_FadeBciFinished() {
 
     ui->frameBci->hide();
+    ui->frameBci->setGraphicsEffect(NULL);
     UpdateActivatableRegions();
 }
 
@@ -702,6 +757,14 @@ void MainWindow::on_SuppressFinished() {
 }
 
 
+void MainWindow::on_UserPresenceChanged( bool present ) {
+
+    if (present != userPresent) {
+        userPresent = present;
+        ShowAll( userPresent );
+    }
+}
+
 
 void MainWindow::ToggleMouse() {
 
@@ -714,6 +777,7 @@ void MainWindow::ToggleMouse() {
     } else {
 
     }
+    UpdateActivatableRegions();
 }
 
 
@@ -736,6 +800,35 @@ void MainWindow::ToggleMenu() {
     ShowMenu( !isVisibleMenu() );
 
     UpdateActivatableRegions();
+}
+
+
+void MainWindow::ShowAll( bool visible ) {
+
+    QGraphicsOpacityEffect * effect = new QGraphicsOpacityEffect(this);
+
+    if (visible == true) {
+
+        ui->frameScreen->setGraphicsEffect(effect);
+
+        QPropertyAnimation *a = new QPropertyAnimation(effect,"opacity");
+        a->setDuration(700);
+        a->setStartValue(0);
+        a->setEndValue(1);
+        a->setEasingCurve(QEasingCurve::InBack);
+        a->start(QPropertyAnimation::DeleteWhenStopped);
+
+    } else {
+
+        ui->frameScreen->setGraphicsEffect(effect);
+
+        QPropertyAnimation *a = new QPropertyAnimation(effect,"opacity");
+        a->setDuration(700);
+        a->setStartValue(1);
+        a->setEndValue(0);
+        a->setEasingCurve(QEasingCurve::OutBack);
+        a->start(QPropertyAnimation::DeleteWhenStopped);
+    }
 }
 
 
@@ -772,11 +865,13 @@ void MainWindow::SlideMenu( int position ) {
 
 void MainWindow::ShowMenu( bool visible ) {
 
+    ui->frameScreen->setGraphicsEffect(NULL);
+
+    QGraphicsOpacityEffect * effect = new QGraphicsOpacityEffect(this);
+
     if (visible == true) {
 
         if (! isVisibleMenu()) {
-
-            QGraphicsOpacityEffect *effect = new QGraphicsOpacityEffect(this);
 
             ui->frameMenu->setGraphicsEffect(effect);
 
@@ -791,8 +886,6 @@ void MainWindow::ShowMenu( bool visible ) {
         }
 
     } else {
-
-        QGraphicsOpacityEffect *effect = new QGraphicsOpacityEffect(this);
 
         if (isVisibleMenu()) ui->frameMenu->setGraphicsEffect(effect);
         if (isVisibleOp())   ShowOp( false );
@@ -815,14 +908,16 @@ void MainWindow::ShowMenu( bool visible ) {
 
 void MainWindow::ShowOp( bool visible ) {
 
+    ui->frameScreen->setGraphicsEffect(NULL);
+
+    QGraphicsOpacityEffect * effect = new QGraphicsOpacityEffect(this);
+
     if (visible == true) {
 
         ShowEye(false);
         ShowBci(false);
 
         if (! isVisibleOp()) {
-
-            QGraphicsOpacityEffect *effect = new QGraphicsOpacityEffect(this);
 
             ui->frameOp->setGraphicsEffect(effect);
 
@@ -837,8 +932,6 @@ void MainWindow::ShowOp( bool visible ) {
         }
 
     } else {
-
-        QGraphicsOpacityEffect *effect = new QGraphicsOpacityEffect(this);
 
         ui->frameOp->setGraphicsEffect(effect);
 
@@ -858,14 +951,16 @@ void MainWindow::ShowOp( bool visible ) {
 
 void MainWindow::ShowEye( bool visible ) {
 
+    ui->frameScreen->setGraphicsEffect(NULL);
+
+    QGraphicsOpacityEffect * effect = new QGraphicsOpacityEffect(this);
+
     if (visible == true) {
 
         ShowOp(false);
         ShowBci(false);
 
         if (! isVisibleEye()) {
-
-            QGraphicsOpacityEffect *effect = new QGraphicsOpacityEffect(this);
 
             ui->frameEye->setGraphicsEffect(effect);
 
@@ -880,8 +975,6 @@ void MainWindow::ShowEye( bool visible ) {
         }
 
     } else {
-
-        QGraphicsOpacityEffect *effect = new QGraphicsOpacityEffect(this);
 
         ui->frameEye->setGraphicsEffect(effect);
 
@@ -901,14 +994,16 @@ void MainWindow::ShowEye( bool visible ) {
 
 void MainWindow::ShowBci( bool visible ) {
 
+    ui->frameScreen->setGraphicsEffect(NULL);
+
+    QGraphicsOpacityEffect * effect = new QGraphicsOpacityEffect(this);
+
     if (visible == true) {
 
         ShowOp(false);
         ShowEye(false);
 
         if (! isVisibleBci()) {
-
-            QGraphicsOpacityEffect *effect = new QGraphicsOpacityEffect(this);
 
             ui->frameBci->setGraphicsEffect(effect);
 
@@ -920,11 +1015,10 @@ void MainWindow::ShowBci( bool visible ) {
             a->start(QPropertyAnimation::DeleteWhenStopped);
 
             ui->frameBci->show();
+            ui->frameBci->setGraphicsEffect(NULL);
         }
 
     } else {
-
-        QGraphicsOpacityEffect *effect = new QGraphicsOpacityEffect(this);
 
         ui->frameBci->setGraphicsEffect(effect);
 
@@ -948,6 +1042,11 @@ void MainWindow::SuppressEyes( int msec ) {
     suppressTimer.start( msec );
 }
 
+
+bool MainWindow::isVisibleApp() {
+
+    return ui->frameScreen->isVisible();
+}
 
 
 bool MainWindow::isVisibleMenu() {
@@ -974,7 +1073,6 @@ bool MainWindow::isVisibleBci() {
 }
 
 
-
 void MainWindow::on_hotkey_pressed() {
 
     ToggleMouse();
@@ -991,7 +1089,6 @@ void MainWindow::on_buttonMain_clicked() {
 
     ToggleMenu();
 }
-
 
 
 void MainWindow::on_buttonOp_clicked() {
