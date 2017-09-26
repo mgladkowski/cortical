@@ -40,13 +40,13 @@
 #define ITK_P                   "ITK_P"
 #define ITK_F                   "ITK_F"
 
-#define ITP_NONE        0
-#define ITP_EXPLORER    1
-#define ITP_BROWSER     2
-#define ITP_BROWSER_FS  3
-#define ITP_VLC         4
-#define ITP_VLC_FS      5
-#define ITP_DEV         6
+#define ITP_NONE                0
+#define ITP_EXPLORER            1
+#define ITP_BROWSER             2
+#define ITP_BROWSER_FS          3
+#define ITP_VLC                 4
+#define ITP_VLC_FS              5
+#define ITP_DEV                 6
 
 
 BOOL CALLBACK EnumChildProc(HWND hwnd, LPARAM lParam);
@@ -79,10 +79,10 @@ public:
         STYLE_INVISIBLE,
         STYLE_SUCCESS,
         STYLE_WARNING,
-        STYLE_DANGER,
+        STYLE_DANGER
     };
 
-    void        on_hotkey_pressed();
+    void        on_hotkey_pressed( const char * key );
 
 
 private:

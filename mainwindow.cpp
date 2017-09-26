@@ -197,11 +197,11 @@ void MainWindow::SetInteractorProfile( int profileId = ITP_NONE ) {
 
     switch (profileId) {
     case ITP_BROWSER:
-        AddInteractor(Interactor(  860,   50,  200,  50, ITK_PAGEUP,
+        AddInteractor(Interactor(  860,   60,  200,  40, ITK_PAGEUP,
                                    glyphicons_chevron_up,
                                    GetPresetInteractor(STYLE_INTERACTOR) ));
 
-        AddInteractor(Interactor(  860, 1000,  200,  70, ITK_PAGEDN,
+        AddInteractor(Interactor(  860, 1000,  200,  40, ITK_PAGEDN,
                                    glyphicons_chevron_down,
                                    GetPresetInteractor(STYLE_INTERACTOR) ));
 
@@ -265,11 +265,11 @@ void MainWindow::SetInteractorProfile( int profileId = ITP_NONE ) {
         break;
 
     case ITP_DEV:
-        AddInteractor(Interactor(  860,   60,  200,  50, ITK_PAGEUP,
+        AddInteractor(Interactor(  860,   60,  200,  40, ITK_PAGEUP,
                                    glyphicons_chevron_up,
                                    GetPresetInteractor(STYLE_INTERACTOR) ));
 
-        AddInteractor(Interactor(  860, 1000,  200,  50, ITK_PAGEDN,
+        AddInteractor(Interactor(  860, 1000,  200,  40, ITK_PAGEDN,
                                    glyphicons_chevron_down,
                                    GetPresetInteractor(STYLE_INTERACTOR) ));
         break;
@@ -431,6 +431,10 @@ void MainWindow::UpdateFocusedProcess() {
                               : ITP_BROWSER );
 
     } else if (focusedExecutable == "C:\\Qt\\Tools\\QtCreator\\bin\\qtcreator.exe") {
+
+        SetInteractorProfile( ITP_DEV );
+
+    } else if (focusedExecutable == "C:\\Program Files\\NetBeans 8.2\\bin\\netbeans64.exe") {
 
         SetInteractorProfile( ITP_DEV );
 
@@ -1071,9 +1075,20 @@ bool MainWindow::isVisibleBci() {
 }
 
 
-void MainWindow::on_hotkey_pressed() {
+void MainWindow::on_hotkey_pressed( const char * _key ) {
 
-    ToggleMouse();
+    QString key = _key;
+
+    if (key == "F1") {
+
+        ToggleMouse();
+
+    } else if (key == "SPACE"
+               && eyes.mouse == EyeXHost::Mouse::Control
+               && currentProfile == ITP_BROWSER) {
+
+        // mouse click at current xy
+    }
 }
 
 
