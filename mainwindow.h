@@ -23,8 +23,6 @@
 #include "interactor.h"
 #include "commctrl.h"
 
-#include <stdio.h>
-#include <shellapi.h>
 
 #define MENU_START              0
 #define MENU_SPACE              260
@@ -34,6 +32,8 @@
 #define ITK_PAGEDN              "ITK_PAGEDN"
 #define ITK_CTRL_T              "ITK_CTRL_T"
 #define ITK_CTRL_T_TAB_F4       "ITK_CTRL_T_TAB_F4"
+#define ITK_CTRL_ALT_BREAK      "ITK_CTRL_ALT_BREAK"
+#define ITK_CTRL_HOME_WIN_DOWN  "ITK_CTRL_HOME_WIN_DOWN"
 #define ITK_ESC                 "ITK_ESC"
 #define ITK_SPACE               "ITK_SPACE"
 #define ITK_N                   "ITK_N"
@@ -47,7 +47,8 @@
 #define ITP_VLC                 4
 #define ITP_VLC_FS              5
 #define ITP_DEV                 6
-
+#define ITP_RDP                 7
+#define ITP_RDP_FS              8
 
 BOOL CALLBACK EnumChildProc(HWND hwnd, LPARAM lParam);
 void TaskBarTest();
@@ -84,6 +85,8 @@ public:
 
     void        on_hotkey_pressed( const char * key );
 
+    QString     GetProcessName( HWND handle );
+    void        GetProcessChildren( HWND hwnd );
 
 private:
 
@@ -103,9 +106,9 @@ private:
     void        InitializeUi();
 
     bool        isProcessFullscreen( HWND window );
-    QString     GetProcessName( HWND handle );
     void        UpdateFocusedProcess();
     void        UpdateStartMenu();
+    void        UiaTest();
 
     void        AddInteractor( Interactor data );
     void        SetInteractorProfile( int profileId );

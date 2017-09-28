@@ -55,6 +55,9 @@ void MainWindow::InitializeUi() {
 
     ui->frameScreen->move( 0,0 );
     ui->frameScreen->resize( desktopRect.width(), desktopRect.height() );
+    ui->frameItr->move( 0,0 );
+    ui->frameItr->resize( desktopRect.width(), desktopRect.height() );
+
     int main_X = static_cast<int>( desktopRect.left() + (desktopRect.width() * 0.65) - 400 );
     int main_Y = static_cast<int>( desktopRect.bottom() - ui->widgetMain->height() );
     ui->widgetMain->move( main_X, main_Y) ;
@@ -167,7 +170,7 @@ void MainWindow::ClearInteractorProfile() {
 
 void MainWindow::AddInteractor( Interactor data ) {
 
-    EyeButton *button = new EyeButton(ui->frameScreen);
+    EyeButton *button = new EyeButton(ui->frameItr);
 
     button->setProperties( data );
 
@@ -272,6 +275,24 @@ void MainWindow::SetInteractorProfile( int profileId = ITP_NONE ) {
         AddInteractor(Interactor(  860, 1000,  200,  40, ITK_PAGEDN,
                                    glyphicons_chevron_down,
                                    GetPresetInteractor(STYLE_INTERACTOR) ));
+        break;
+
+    case ITP_RDP:
+
+        AddInteractor(Interactor( 1650,  900,   70,  70, ITK_CTRL_ALT_BREAK,
+                                  glyphicons_fit_image_to_frame,
+                                  GetPresetInteractor(STYLE_INTERACTOR) ));
+        break;
+
+    case ITP_RDP_FS:
+
+        AddInteractor(Interactor( 1550,  900,   70,  70, ITK_CTRL_ALT_BREAK,
+                                  glyphicons_fit_frame_to_image,
+                                  GetPresetInteractor(STYLE_INTERACTOR) ));
+
+        AddInteractor(Interactor( 1650,  900,   70,  70, ITK_CTRL_HOME_WIN_DOWN,
+                                  glyphicons_disk_import,
+                                  GetPresetInteractor(STYLE_INTERACTOR) ));
         break;
 
     case ITP_NONE:
@@ -387,6 +408,9 @@ QString MainWindow::GetProcessName( HWND window ) {
     if (NULL != hProcess ) {
 
         GetModuleFileNameEx( hProcess, NULL, buffer, MAX_PATH );
+
+        HWND hwnd = GetForegroundWindow();
+        //GetProcessChildren( hwnd );
     }
 
     QString result = QString::fromStdWString( buffer );
@@ -397,6 +421,12 @@ QString MainWindow::GetProcessName( HWND window ) {
 
     // this is how you would invoke an external DLL function, in this case lock the workstation
     //QProcess::execute("rundll32", QStringList("USER32.DLL,LockWorkStation"));
+}
+
+
+void MainWindow::GetProcessChildren( HWND hwnd ) {
+
+    EnumChildWindows( hwnd, EnumChildProc, (LPARAM)this);
 }
 
 
@@ -443,6 +473,13 @@ void MainWindow::UpdateFocusedProcess() {
         SetInteractorProfile( focusedIsFullscreen
                               ? ITP_VLC_FS
                               : ITP_VLC );
+
+    } else if (focusedExecutable == "C:\\Windows\\System32\\mstsc.exe") {
+
+        SetInteractorProfile( focusedIsFullscreen
+                              ? ITP_RDP_FS
+                              : ITP_RDP );
+
     } else {
 
         SetInteractorProfile( ITP_NONE );
@@ -476,8 +513,22 @@ void MainWindow::UpdateStartMenu() {
 
 BOOL CALLBACK EnumChildProc(HWND hwnd, LPARAM lParam) {
 
-     qDebug() << qPrintable("hwnd_Child = ") << hwnd;
-     return true;
+    TCHAR buffer[MAX_PATH] = TEXT("unknown");
+    LPRECT r;
+    GetWindowRect(hwnd, r);
+    GetClassName( hwnd, buffer, MAX_PATH );
+
+    QString result = QString::fromStdWString( buffer );
+
+    if(r->top> 0){
+        qDebug() << hwnd << qPrintable(result) << r->top << r->left << r->bottom << r->right;
+    }
+
+    MainWindow* sender = (MainWindow*)lParam;
+    //qDebug() << "children:";
+    sender->GetProcessChildren( hwnd );
+
+    return true;
 }
 
 
@@ -732,6 +783,70 @@ void MainWindow::on_InteractorActivated() {
         SendInput(1, &ip, sizeof(INPUT));
         ip.ki.dwFlags = KEYEVENTF_KEYUP;
         SendInput(1, &ip, sizeof(INPUT));
+
+    }
+    if (senderName == ITK_CTRL_ALT_BREAK) {
+
+        // send (ctrl+alt)+break
+
+        int key_count = 6;
+        INPUT * input = new INPUT[ key_count ];
+        for (int i = 0; i < key_count; i++) {
+            input[i].ki.dwFlags = 0;
+            input[i].type = INPUT_KEYBOARD;
+            input[i].ki.time = 0;
+        }
+        input[0].ki.wVk = VK_CONTROL;
+        input[0].ki.wScan = MapVirtualKey(VK_CONTROL, MAPVK_VK_TO_VSC);
+        input[1].ki.wVk = VK_MENU;
+        input[1].ki.wScan = MapVirtualKey(VK_MENU, MAPVK_VK_TO_VSC);
+        input[2].ki.wVk = VK_CANCEL;
+        input[2].ki.wScan = MapVirtualKey(VK_CANCEL, MAPVK_VK_TO_VSC);
+        input[3].ki.dwFlags = KEYEVENTF_KEYUP;
+        input[3].ki.wVk = input[0].ki.wVk;
+        input[3].ki.wScan = input[0].ki.wScan;
+        input[4].ki.dwFlags = KEYEVENTF_KEYUP;
+        input[4].ki.wVk = input[1].ki.wVk;
+        input[4].ki.wScan = input[1].ki.wScan;
+        input[5].ki.dwFlags = KEYEVENTF_KEYUP;
+        input[5].ki.wVk = input[2].ki.wVk;
+        input[5].ki.wScan = input[2].ki.wScan;
+
+        SendInput(key_count, (LPINPUT)input, sizeof(INPUT));
+
+    }
+    if (senderName == ITK_CTRL_HOME_WIN_DOWN) {
+
+        // send (ctrl+home),(win+down)
+
+        int key_count = 8;
+        INPUT * input = new INPUT[ key_count ];
+        for (int i = 0; i < key_count; i++) {
+            input[i].ki.dwFlags = 0;
+            input[i].type = INPUT_KEYBOARD;
+            input[i].ki.time = 0;
+        }
+        input[0].ki.wVk = VK_CONTROL;
+        input[0].ki.wScan = MapVirtualKey(VK_CONTROL, MAPVK_VK_TO_VSC);
+        input[1].ki.wVk = VK_HOME;
+        input[1].ki.wScan = MapVirtualKey(VK_HOME, MAPVK_VK_TO_VSC);
+        input[2].ki.dwFlags = KEYEVENTF_KEYUP;
+        input[2].ki.wVk = input[0].ki.wVk;
+        input[2].ki.wScan = input[0].ki.wScan;
+        input[3].ki.dwFlags = KEYEVENTF_KEYUP;
+        input[3].ki.wVk = input[1].ki.wVk;
+        input[3].ki.wScan = input[1].ki.wScan;
+        input[4].ki.wVk = VK_LWIN;
+        input[4].ki.wScan = MapVirtualKey(VK_LWIN, MAPVK_VK_TO_VSC);
+        input[5].ki.wVk = VK_DOWN;
+        input[5].ki.wScan = MapVirtualKey(VK_DOWN, MAPVK_VK_TO_VSC);
+        input[6].ki.dwFlags = KEYEVENTF_KEYUP;
+        input[6].ki.wVk = input[4].ki.wVk;
+        input[6].ki.wScan = input[4].ki.wScan;
+        input[7].ki.dwFlags = KEYEVENTF_KEYUP;
+        input[7].ki.wVk = input[5].ki.wVk;
+        input[7].ki.wScan = input[5].ki.wScan;
+        SendInput(key_count, (LPINPUT)input, sizeof(INPUT));
 
     }
 }
