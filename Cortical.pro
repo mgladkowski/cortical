@@ -55,7 +55,8 @@ HEADERS += \
     bcihost.h \
     eyebutton.h \
     glyphicons.h \
-    interactor.h
+    interactor.h \
+    enums.h
 
 FORMS += \
         mainwindow.ui

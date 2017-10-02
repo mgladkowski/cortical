@@ -16,48 +16,22 @@
 #include <QFont>
 #include <windows.h>
 #include <psapi.h>
-#include "glyphicons.h"
+
+#include "enums.h"
+#include "bcihost.h"
 #include "eyexhost.h"
 #include "eyebutton.h"
-#include "bcihost.h"
 #include "interactor.h"
-#include "commctrl.h"
+#include "glyphicons.h"
 
 
 #define MENU_START              0
 #define MENU_SPACE              260
 
-#define ITK_ALT_LEFT            "ITK_ALT_LEFT"
-#define ITK_PAGEUP              "ITK_PAGEUP"
-#define ITK_PAGEDN              "ITK_PAGEDN"
-#define ITK_CTRL_T              "ITK_CTRL_T"
-#define ITK_CTRL_T_TAB_F4       "ITK_CTRL_T_TAB_F4"
-#define ITK_CTRL_ALT_BREAK      "ITK_CTRL_ALT_BREAK"
-#define ITK_CTRL_HOME_WIN_DOWN  "ITK_CTRL_HOME_WIN_DOWN"
-#define ITK_ESC                 "ITK_ESC"
-#define ITK_SPACE               "ITK_SPACE"
-#define ITK_N                   "ITK_N"
-#define ITK_P                   "ITK_P"
-#define ITK_F                   "ITK_F"
-
-#define ITP_NONE                0
-#define ITP_EXPLORER            1
-#define ITP_BROWSER             2
-#define ITP_BROWSER_FS          3
-#define ITP_VLC                 4
-#define ITP_VLC_FS              5
-#define ITP_DEV                 6
-#define ITP_RDP                 7
-#define ITP_RDP_FS              8
-
-BOOL CALLBACK EnumChildProc(HWND hwnd, LPARAM lParam);
-void TaskBarTest();
-
 
 namespace Ui {
 class MainWindow;
 }
-
 
 class MainWindow : public QMainWindow {
 
@@ -72,21 +46,8 @@ public:
     EyeXHost    eyes;
     BciHost     brain;
 
-    enum InteractorPreset {
-        STYLE_MAIN = 1,
-        STYLE_MENU,
-        STYLE_BUTTON,
-        STYLE_INTERACTOR,
-        STYLE_INVISIBLE,
-        STYLE_SUCCESS,
-        STYLE_WARNING,
-        STYLE_DANGER
-    };
-
     void        on_hotkey_pressed( const char * key );
 
-    QString     GetProcessName( HWND handle );
-    void        GetProcessChildren( HWND hwnd );
 
 private:
 
@@ -104,17 +65,14 @@ private:
     bool        userPresent;
 
     void        InitializeUi();
-
+    QString     GetProcessName( HWND handle );
     bool        isProcessFullscreen( HWND window );
     void        UpdateFocusedProcess();
-    void        UpdateStartMenu();
-    void        UiaTest();
-
+    void        ClearInteractorProfile();
+    void        ShowInteractorProfile( bool visible );
     void        AddInteractor( Interactor data );
     void        SetInteractorProfile( int profileId );
-    void        ClearInteractorProfile();
     Interactor::Params GetPresetInteractor( int styleId );
-
     RECT        GetScreenBounds( EyeButton * button );
     void        UpdateActivatableRegions();
     void        SuppressEyes( int msec );

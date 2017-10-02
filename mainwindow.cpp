@@ -38,6 +38,8 @@ MainWindow::~MainWindow() {
 }
 
 
+/* Initialize UI configuration and map initial interactors
+ */
 void MainWindow::InitializeUi() {
 
     // icons
@@ -47,8 +49,6 @@ void MainWindow::InitializeUi() {
     iconFont.setPixelSize(24);
 
     // sets position of main window objects
-
-    this->showFullScreen();
 
     QRect   desktopRect = QApplication::desktop()->availableGeometry(this);
     QPoint  center      = desktopRect.center();
@@ -155,6 +155,7 @@ void MainWindow::UpdateActivatableRegions() {
 void MainWindow::ClearInteractorProfile() {
 
     QList<EyeButton*> list = this->findChildren<EyeButton *>();
+
     foreach(EyeButton *b, list) {
 
         if (b->isInteractor == true) {
@@ -165,6 +166,19 @@ void MainWindow::ClearInteractorProfile() {
     currentProfile = 0;
 
     UpdateActivatableRegions();
+}
+
+
+void MainWindow::ShowInteractorProfile( bool visible ) {
+
+    if (visible == true) {
+
+        ui->frameItr->show();
+
+    } else {
+
+        ui->frameItr->hide();
+    }
 }
 
 
@@ -410,7 +424,6 @@ QString MainWindow::GetProcessName( HWND window ) {
         GetModuleFileNameEx( hProcess, NULL, buffer, MAX_PATH );
 
         HWND hwnd = GetForegroundWindow();
-        //GetProcessChildren( hwnd );
     }
 
     QString result = QString::fromStdWString( buffer );
@@ -418,15 +431,6 @@ QString MainWindow::GetProcessName( HWND window ) {
     CloseHandle( hProcess );
 
     return result;
-
-    // this is how you would invoke an external DLL function, in this case lock the workstation
-    //QProcess::execute("rundll32", QStringList("USER32.DLL,LockWorkStation"));
-}
-
-
-void MainWindow::GetProcessChildren( HWND hwnd ) {
-
-    EnumChildWindows( hwnd, EnumChildProc, (LPARAM)this);
 }
 
 
@@ -484,60 +488,6 @@ void MainWindow::UpdateFocusedProcess() {
 
         SetInteractorProfile( ITP_NONE );
     }
-}
-
-
-void MainWindow::UpdateStartMenu() {
-
-    QString strClass = "Shell_TrayWnd";
-    HWND hShell = FindWindow( (LPCWSTR)(const wchar_t*)strClass.utf16(), NULL );
-
-    strClass = "Start";
-    HWND hStart = FindWindowEx(hShell, NULL, (LPCWSTR)(const wchar_t*)strClass.utf16(), NULL );
-
-    strClass = "ReBarWindow32";
-    HWND h1 = FindWindowEx(hShell, NULL, (LPCWSTR)(const wchar_t*)strClass.utf16(), NULL );
-
-    strClass = "MSTaskSwWClass";
-    HWND h2 = FindWindowEx(h1, NULL, (LPCWSTR)(const wchar_t*)strClass.utf16(), NULL );
-
-    strClass = "MSTaskListWClass";
-    HWND hTask = FindWindowEx(h2, NULL, (LPCWSTR)(const wchar_t*)strClass.utf16(), NULL );
-    qDebug() << hTask;
-
-//    int count = SendMessage( hStart, TB_BUTTONCOUNT, 0, 0 );
-//    qDebug() << count;
-    //BOOL foundChild = EnumChildWindows( hTask, (WNDENUMPROC)EnumChildProc, 0);
-}
-
-
-BOOL CALLBACK EnumChildProc(HWND hwnd, LPARAM lParam) {
-
-    TCHAR buffer[MAX_PATH] = TEXT("unknown");
-    LPRECT r;
-    GetWindowRect(hwnd, r);
-    GetClassName( hwnd, buffer, MAX_PATH );
-
-    QString result = QString::fromStdWString( buffer );
-
-    if(r->top> 0){
-        qDebug() << hwnd << qPrintable(result) << r->top << r->left << r->bottom << r->right;
-    }
-
-    MainWindow* sender = (MainWindow*)lParam;
-    //qDebug() << "children:";
-    sender->GetProcessChildren( hwnd );
-
-    return true;
-}
-
-
-void TaskBarTest() {
-
-    APPBARDATA abd = { sizeof(abd) };
-    UINT uState = (UINT)SHAppBarMessage(ABM_GETSTATE, &abd);
-    qDebug() << QString((uState & ABS_ALWAYSONTOP) ? "always on top" : "not always on top");
-    qDebug() << QString((uState & ABS_AUTOHIDE) ? "auto hide" : "not auto hide");
 }
 
 
