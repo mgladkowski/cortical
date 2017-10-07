@@ -46,7 +46,7 @@ void MainWindow::InitializeUi() {
 
     QFontDatabase::addApplicationFont(":/Glyphicons-Regular.otf");
     iconFont.setFamily("GLYPHICONS");
-    iconFont.setPixelSize(24);
+    iconFont.setPixelSize(32);
 
     // sets position of main window objects
 
@@ -491,14 +491,14 @@ void MainWindow::UpdateFocusedProcess() {
 }
 
 
-void MainWindow::on_AnimationFinished() {
+void MainWindow::on_ActivationEvent( int interactorId ) {
 
-    UpdateActivatableRegions();
 }
 
 
-void MainWindow::on_ActivationEvent( int interactorId ) {
+void MainWindow::on_AnimationFinished() {
 
+    UpdateActivatableRegions();
 }
 
 
@@ -826,10 +826,8 @@ void MainWindow::on_SuppressFinished() {
 
 void MainWindow::on_UserPresenceChanged( bool present ) {
 
-    if (present != userPresent) {
-        userPresent = present;
-        ShowAll( userPresent );
-    }
+    userPresent = present;
+    ShowAll( userPresent );
 }
 
 
@@ -895,7 +893,11 @@ void MainWindow::ShowAll( bool visible ) {
         a->setEndValue(0);
         a->setEasingCurve(QEasingCurve::OutBack);
         a->start(QPropertyAnimation::DeleteWhenStopped);
+
+        connect(a,SIGNAL(finished()),this,SLOT(on_FadeAllFinished()));
     }
+
+    UpdateActivatableRegions();
 }
 
 
@@ -918,15 +920,14 @@ void MainWindow::SlideMenu( int position ) {
     int w = ui->frameSlider->width();
     int h = ui->frameSlider->height();
 
-    QPropertyAnimation *animation = new QPropertyAnimation(ui->frameSlider, "geometry");
+    QPropertyAnimation *a = new QPropertyAnimation(ui->frameSlider, "geometry");
 
-    animation->setDuration(400);
-    animation->setStartValue( QRect(x, y, w, h) );
-    animation->setEndValue( QRect(newX, y, w, h) );
+    connect(a, SIGNAL(finished()), this, SLOT( on_AnimationFinished()) );
 
-    connect(animation, SIGNAL(finished()), this, SLOT( on_AnimationFinished()) );
-
-    animation->start(QAbstractAnimation::DeleteWhenStopped);
+    a->setDuration( 400 );
+    a->setStartValue( QRect(x, y, w, h) );
+    a->setEndValue( QRect(newX, y, w, h) );
+    a->start( QAbstractAnimation::DeleteWhenStopped );
 }
 
 
@@ -960,13 +961,14 @@ void MainWindow::ShowMenu( bool visible ) {
         if (isVisibleBci())  ShowBci( false );
 
         QPropertyAnimation *a = new QPropertyAnimation(effect,"opacity");
+
+        connect(a,SIGNAL(finished()),this,SLOT(on_FadeMenuFinished()));
+
         a->setDuration(700);
         a->setStartValue(1);
         a->setEndValue(0);
         a->setEasingCurve(QEasingCurve::OutBack);
         a->start(QPropertyAnimation::DeleteWhenStopped);
-
-        connect(a,SIGNAL(finished()),this,SLOT(on_FadeMenuFinished()));
     }
 
     UpdateActivatableRegions();

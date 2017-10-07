@@ -216,7 +216,7 @@ void EyeButton::setStyle( Interactor::Params params ) {
     if (isInteractor)
         font.setPixelSize(64);
     else
-        font.setPixelSize(24);
+        font.setPixelSize(32);
 
     setFont(font);
     UpdateStyleState();

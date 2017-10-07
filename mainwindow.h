@@ -16,7 +16,6 @@
 #include <QFont>
 #include <windows.h>
 #include <psapi.h>
-
 #include "enums.h"
 #include "bcihost.h"
 #include "eyexhost.h"
