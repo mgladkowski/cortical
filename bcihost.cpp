@@ -3,14 +3,11 @@
 BciHost::BciHost(QObject *parent) : QObject(parent) {
 
     socket = new QUdpSocket(this);
-
     socket->bind(QHostAddress::LocalHost, 12345);
-
-    qDebug() << socket->state();
 
     connect(socket, SIGNAL(readyRead()), this, SLOT(readyRead()));
 
-    qDebug() << "BCI constructed";
+    qDebug() << "BCI " << socket->state();
 }
 
 
