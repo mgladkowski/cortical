@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QCursor>
+#include <QUdpSocket>
 #include <windows.h>
 
 
@@ -16,25 +17,26 @@ public:
     explicit    BciHost(QObject *parent = nullptr);
                 ~BciHost();
 
-    enum State {
-                Initializing,
-                Connected,
-                Disconnected,
-                Failed
-    };
+    enum State { Initializing,
+                 Connected,
+                 Disconnected,
+                 Failed };
 
-    enum Mouse {
-                Off,
-                Gaze,
-                Control
-    };
+    enum Mouse { Off,
+                 Gaze,
+                 Control };
 
     Mouse       mouse;
 
-signals:
+
+private:
+
+    QUdpSocket  *socket;
 
 
 public slots:
+
+    void        readyRead();
 
 };
 
