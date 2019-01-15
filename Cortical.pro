@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -20,11 +20,10 @@ TARGET = Cortical
 
 TEMPLATE = app
 
-LIBS += D:/Qt/projects/Cortical/lib/Tobii.EyeX.Client.lib
-LIBS += D:/Qt/projects/Cortical/lib/gdi32.lib
-LIBS += D:/Qt/projects/Cortical/lib/gdiplus.lib
-LIBS += "C:/Program Files (x86)/Windows Kits/10/Lib/10.0.15063.0/um/x86/Psapi.Lib"
-
+LIBS += D:/Lab/Qt/projects/Cortical/lib/x64/Tobii.EyeX.Client.lib
+LIBS += D:/Lab/Qt/projects/Cortical/lib/x64/Gdi32.Lib
+LIBS += D:/Lab/Qt/projects/Cortical/lib/x64/gdiplus.lib
+LIBS += D:/Lab/Qt/projects/Cortical/lib/x64/Psapi.Lib
 
 
 include(qhotkey.pri)

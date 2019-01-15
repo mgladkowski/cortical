@@ -1,0 +1,14 @@
+debug/qhotkey.o
+debug/qhotkey_win.o
+debug/main.o
+debug/mainwindow.o
+debug/eyexhost.o
+debug/bcihost.o
+debug/eyebutton.o
+debug/qrc_icons.o
+debug/moc_qhotkey.o
+debug/moc_qhotkey_p.o
+debug/moc_mainwindow.o
+debug/moc_eyexhost.o
+debug/moc_bcihost.o
+debug/moc_eyebutton.o

@@ -711,12 +711,12 @@ QPushButton:hover{
          </widget>
         </widget>
        </widget>
-       <zorder>buttonMouse</zorder>
        <zorder>buttonMain</zorder>
        <zorder>frameBci</zorder>
        <zorder>frameMenu</zorder>
        <zorder>frameOp</zorder>
        <zorder>frameEye</zorder>
+       <zorder>buttonMouse</zorder>
       </widget>
       <widget class="QFrame" name="frameItr">
        <property name="geometry">

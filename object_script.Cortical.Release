@@ -1,0 +1,14 @@
+release/qhotkey.o
+release/qhotkey_win.o
+release/main.o
+release/mainwindow.o
+release/eyexhost.o
+release/bcihost.o
+release/eyebutton.o
+release/qrc_icons.o
+release/moc_qhotkey.o
+release/moc_qhotkey_p.o
+release/moc_mainwindow.o
+release/moc_eyexhost.o
+release/moc_bcihost.o
+release/moc_eyebutton.o

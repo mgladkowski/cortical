@@ -8,7 +8,7 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     MainWindow w;
 
-    a.setApplicationName("Telepathos Controller");
+    a.setApplicationName("Telepath");
     a.setOrganizationName("Mike Gladkowski");
     a.setOrganizationDomain("http://northportage.ca");
 

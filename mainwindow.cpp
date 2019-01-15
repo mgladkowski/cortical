@@ -9,7 +9,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     Qt::WindowFlags flags = this->windowFlags();
     setWindowFlags(flags | Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
-    setParent(0);
+    setParent(nullptr);
     setAttribute(Qt::WA_NoSystemBackground, true);
     setAttribute(Qt::WA_TranslucentBackground, true);
 
@@ -51,7 +51,7 @@ void MainWindow::InitializeUi() {
     // sets position of main window objects
 
     QRect   desktopRect = QApplication::desktop()->availableGeometry(this);
-    QPoint  center      = desktopRect.center();
+    //QPoint  center      = desktopRect.center();
 
     ui->frameScreen->move( 0,0 );
     ui->frameScreen->resize( desktopRect.width(), desktopRect.height() );
@@ -492,7 +492,7 @@ void MainWindow::UpdateFocusedProcess() {
 
 
 void MainWindow::on_ActivationEvent( int interactorId ) {
-
+    Q_UNUSED( interactorId );
 }
 
 
@@ -504,7 +504,7 @@ void MainWindow::on_AnimationFinished() {
 
 void MainWindow::on_FadeAllFinished() {
 
-    ui->frameScreen->setGraphicsEffect(NULL);
+    ui->frameScreen->setGraphicsEffect( nullptr );
     UpdateActivatableRegions();
 }
 
@@ -516,7 +516,7 @@ void MainWindow::on_FadeMenuFinished() {
     ui->frameEye->hide();
     ui->frameBci->hide();
 
-    ui->frameMenu->setGraphicsEffect(NULL);
+    ui->frameMenu->setGraphicsEffect(nullptr);
 
     UpdateActivatableRegions();
 }
@@ -525,7 +525,7 @@ void MainWindow::on_FadeMenuFinished() {
 void MainWindow::on_FadeOpsFinished() {
 
     ui->frameOp->hide();
-    ui->frameOp->setGraphicsEffect(NULL);
+    ui->frameOp->setGraphicsEffect(nullptr);
     UpdateActivatableRegions();
 }
 
@@ -533,7 +533,7 @@ void MainWindow::on_FadeOpsFinished() {
 void MainWindow::on_FadeEyeFinished() {
 
     ui->frameEye->hide();
-    ui->frameEye->setGraphicsEffect(NULL);
+    ui->frameEye->setGraphicsEffect(nullptr);
     UpdateActivatableRegions();
 }
 
@@ -541,7 +541,7 @@ void MainWindow::on_FadeEyeFinished() {
 void MainWindow::on_FadeBciFinished() {
 
     ui->frameBci->hide();
-    ui->frameBci->setGraphicsEffect(NULL);
+    ui->frameBci->setGraphicsEffect(nullptr);
     UpdateActivatableRegions();
 }
 
@@ -933,7 +933,7 @@ void MainWindow::SlideMenu( int position ) {
 
 void MainWindow::ShowMenu( bool visible ) {
 
-    ui->frameScreen->setGraphicsEffect(NULL);
+    ui->frameScreen->setGraphicsEffect(nullptr);
 
     QGraphicsOpacityEffect * effect = new QGraphicsOpacityEffect(this);
 
@@ -977,7 +977,7 @@ void MainWindow::ShowMenu( bool visible ) {
 
 void MainWindow::ShowOp( bool visible ) {
 
-    ui->frameScreen->setGraphicsEffect(NULL);
+    ui->frameScreen->setGraphicsEffect(nullptr);
 
     QGraphicsOpacityEffect * effect = new QGraphicsOpacityEffect(this);
 
@@ -1020,7 +1020,7 @@ void MainWindow::ShowOp( bool visible ) {
 
 void MainWindow::ShowEye( bool visible ) {
 
-    ui->frameScreen->setGraphicsEffect(NULL);
+    ui->frameScreen->setGraphicsEffect(nullptr);
 
     QGraphicsOpacityEffect * effect = new QGraphicsOpacityEffect(this);
 
@@ -1063,7 +1063,7 @@ void MainWindow::ShowEye( bool visible ) {
 
 void MainWindow::ShowBci( bool visible ) {
 
-    ui->frameScreen->setGraphicsEffect(NULL);
+    ui->frameScreen->setGraphicsEffect(nullptr);
 
     QGraphicsOpacityEffect * effect = new QGraphicsOpacityEffect(this);
 
