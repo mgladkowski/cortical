@@ -188,7 +188,6 @@ void EyeXHost::OnEngineStateChanged(TX_CONSTHANDLE hAsyncData) {
 
     TX_RESULT result = TX_RESULT_UNKNOWN;
     TX_HANDLE hStateBag = TX_EMPTY_HANDLE;
-    TX_INTEGER wtf;
 
     if (txGetAsyncDataResultCode(hAsyncData, &result) == TX_RESULT_OK &&
         txGetAsyncDataContent(hAsyncData, &hStateBag) == TX_RESULT_OK) {

@@ -6,7 +6,7 @@
 #define ITK_PAGEUP              "ITK_PAGEUP"
 #define ITK_PAGEDN              "ITK_PAGEDN"
 #define ITK_CTRL_T              "ITK_CTRL_T"
-#define ITK_CTRL_T_TAB_F4       "ITK_CTRL_T_TAB_F4"
+#define ITK_CTRL_F4             "ITK_CTRL_F4"
 #define ITK_CTRL_ALT_BREAK      "ITK_CTRL_ALT_BREAK"
 #define ITK_CTRL_HOME_WIN_DOWN  "ITK_CTRL_HOME_WIN_DOWN"
 #define ITK_ESC                 "ITK_ESC"

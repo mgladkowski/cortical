@@ -19,6 +19,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     eyes.Init( (HWND)this->winId() );
 
+    userPresent = true;
+
     QObject::connect(
                 &eyes, SIGNAL(UserPresenceChanged(bool)),
                 this, SLOT(on_UserPresenceChanged(bool))
@@ -222,17 +224,13 @@ void MainWindow::SetInteractorProfile( int profileId = ITP_NONE ) {
                                    glyphicons_chevron_down,
                                    GetPresetInteractor(STYLE_INTERACTOR) ));
 
-        AddInteractor(Interactor( 1600,  500,   70,  70, ITK_ALT_LEFT,
+        AddInteractor(Interactor( 1600,  700,   70,  70, ITK_ALT_LEFT,
                                   glyphicons_arrow_left,
                                   GetPresetInteractor(STYLE_INTERACTOR) ));
 
-        AddInteractor(Interactor( 1600,  700,   70,  70, ITK_CTRL_T,
+        AddInteractor(Interactor( 1600,  900,   70,  70, ITK_CTRL_T,
                                   glyphicons_more_windows,
                                   GetPresetInteractor(STYLE_INTERACTOR) ));
-
-        AddInteractor(Interactor( 1600,  900,   70,  70, ITK_CTRL_T_TAB_F4,
-                                  glyphicons_remove,
-                                  GetPresetInteractor(STYLE_DANGER) ));
         break;
 
     case ITP_BROWSER_FS:
@@ -439,6 +437,7 @@ bool MainWindow::isProcessFullscreen( HWND window ) {
     RECT a, b;
     GetWindowRect(window, &a);
     GetWindowRect(GetDesktopWindow(), &b);
+
     return (a.left   == b.left  &&
             a.top    == b.top   &&
             a.right  == b.right &&
@@ -459,6 +458,12 @@ void MainWindow::UpdateFocusedProcess() {
                               : ITP_BROWSER );
 
     } else if (focusedExecutable == "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe") {
+
+        SetInteractorProfile( focusedIsFullscreen
+                              ? ITP_BROWSER_FS
+                              : ITP_BROWSER );
+
+    } else if (focusedExecutable == "C:\\Program Files (x86)\\BraveSoftware\\Brave-Browser\\Application\\brave.exe") {
 
         SetInteractorProfile( focusedIsFullscreen
                               ? ITP_BROWSER_FS
@@ -504,7 +509,7 @@ void MainWindow::on_AnimationFinished() {
 
 void MainWindow::on_FadeAllFinished() {
 
-    ui->frameScreen->setGraphicsEffect( nullptr );
+    //ui->frameScreen->setGraphicsEffect( nullptr );
     UpdateActivatableRegions();
 }
 
@@ -547,6 +552,8 @@ void MainWindow::on_FadeBciFinished() {
 
 
 void MainWindow::on_SystemTimer() {
+
+    if (userPresent == false) return;
 
     HWND phWnd = GetForegroundWindow();
     bool pFs = isProcessFullscreen( phWnd );
@@ -621,7 +628,7 @@ void MainWindow::on_InteractorActivated() {
     }
     if (senderName == ITK_CTRL_T) {
 
-        // send CTRL + (T, TAB, F4)
+        // send CTRL + (T)
 
         int key_count = 8;
         INPUT * input = new INPUT[ key_count ];
@@ -639,25 +646,13 @@ void MainWindow::on_InteractorActivated() {
         input[2].ki.wVk = input[1].ki.wVk;
         input[2].ki.wScan = input[1].ki.wScan;
 
-        input[3].ki.wVk = VK_TAB;
-        input[3].ki.wScan = MapVirtualKey(VK_TAB, MAPVK_VK_TO_VSC);
-        input[4].ki.dwFlags = KEYEVENTF_KEYUP;
-        input[4].ki.wVk = input[3].ki.wVk;
-        input[4].ki.wScan = input[3].ki.wScan;
-
-        input[5].ki.wVk = VK_F4;
-        input[5].ki.wScan = MapVirtualKey(VK_F4, MAPVK_VK_TO_VSC);
-        input[6].ki.dwFlags = KEYEVENTF_KEYUP;
-        input[6].ki.wVk = input[5].ki.wVk;
-        input[6].ki.wScan = input[5].ki.wScan;
-
         input[7].ki.dwFlags = KEYEVENTF_KEYUP;
         input[7].ki.wVk = input[0].ki.wVk;
         input[7].ki.wScan = input[0].ki.wScan;
         SendInput(key_count, (LPINPUT)input, sizeof(INPUT));
 
     }
-    if (senderName == ITK_CTRL_T_TAB_F4) {
+    if (senderName == ITK_CTRL_F4) {
 
         // send CTRL + F4
 
@@ -896,7 +891,6 @@ void MainWindow::ShowAll( bool visible ) {
 
         connect(a,SIGNAL(finished()),this,SLOT(on_FadeAllFinished()));
     }
-
     UpdateActivatableRegions();
 }
 
