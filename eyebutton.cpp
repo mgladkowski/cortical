@@ -214,9 +214,9 @@ void EyeButton::setStyle( Interactor::Params params ) {
     QFont font;
     font.setFamily("GLYPHICONS");
     if (isInteractor)
-        font.setPixelSize(64);
+        font.setPixelSize(58);
     else
-        font.setPixelSize(32);
+        font.setPixelSize(26);
 
     setFont(font);
     UpdateStyleState();

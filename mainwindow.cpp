@@ -17,7 +17,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     InitializeUi();
 
-    eyes.Init( (HWND)this->winId() );
+    eyes.Init( reinterpret_cast<HWND>(this->winId()) );
 
     userPresent = true;
 
@@ -48,7 +48,7 @@ void MainWindow::InitializeUi() {
 
     QFontDatabase::addApplicationFont(":/Glyphicons-Regular.otf");
     iconFont.setFamily("GLYPHICONS");
-    iconFont.setPixelSize(32);
+    iconFont.setPixelSize(30);
 
     // sets position of main window objects
 
@@ -120,7 +120,7 @@ void MainWindow::InitializeUi() {
  */
 RECT MainWindow::GetScreenBounds( EyeButton * button ) {
 
-    HWND hButton = (HWND)button->winId();
+    HWND hButton = reinterpret_cast<HWND>(button->winId());
     QSize size = button->size();
     POINT point = { 0, 0 };
     ClientToScreen(hButton, &point);
@@ -146,7 +146,7 @@ void MainWindow::UpdateActivatableRegions() {
     foreach(EyeButton *b, list) {
 
         if (b->isVisible()) {
-            regions.push_back(ActivatableRegion(b->winId(), GetScreenBounds(b)));
+            regions.push_back(ActivatableRegion( static_cast<int>(b->winId()), GetScreenBounds(b)));
         }
     }
 
@@ -216,29 +216,29 @@ void MainWindow::SetInteractorProfile( int profileId = ITP_NONE ) {
 
     switch (profileId) {
     case ITP_BROWSER:
-        AddInteractor(Interactor(  860,   60,  200,  40, ITK_PAGEUP,
+        AddInteractor(Interactor(  860,   80,  170,  36, ITK_PAGEUP,
                                    glyphicons_chevron_up,
                                    GetPresetInteractor(STYLE_INTERACTOR) ));
 
-        AddInteractor(Interactor(  860, 1000,  200,  40, ITK_PAGEDN,
+        AddInteractor(Interactor(  860, 1000,  170,  36, ITK_PAGEDN,
                                    glyphicons_chevron_down,
                                    GetPresetInteractor(STYLE_INTERACTOR) ));
 
-        AddInteractor(Interactor( 1600,  700,   70,  70, ITK_ALT_LEFT,
+        AddInteractor(Interactor( 1550,  700,   60,  60, ITK_ALT_LEFT,
                                   glyphicons_arrow_left,
                                   GetPresetInteractor(STYLE_INTERACTOR) ));
 
-        AddInteractor(Interactor( 1600,  900,   70,  70, ITK_CTRL_T,
+        AddInteractor(Interactor( 1550,  900,   60,  60, ITK_CTRL_T,
                                   glyphicons_more_windows,
                                   GetPresetInteractor(STYLE_INTERACTOR) ));
         break;
 
     case ITP_BROWSER_FS:
-        AddInteractor(Interactor(  860,  700,  70,  70, ITK_SPACE,
+        AddInteractor(Interactor(  1550,  700,  60,  60, ITK_SPACE,
                                    glyphicons_pause,
                                    GetPresetInteractor(STYLE_INTERACTOR) ));
 
-        AddInteractor(Interactor(  1060,  700,  70,  70, ITK_ESC,
+        AddInteractor(Interactor(  1550,  900,  60,  60, ITK_ESC,
                                    glyphicons_fit_frame_to_image,
                                    GetPresetInteractor(STYLE_INTERACTOR) ));
         break;
@@ -280,29 +280,29 @@ void MainWindow::SetInteractorProfile( int profileId = ITP_NONE ) {
         break;
 
     case ITP_DEV:
-        AddInteractor(Interactor(  860,   60,  200,  40, ITK_PAGEUP,
+        AddInteractor(Interactor(  860,   80,  170,  36, ITK_PAGEUP,
                                    glyphicons_chevron_up,
                                    GetPresetInteractor(STYLE_INTERACTOR) ));
 
-        AddInteractor(Interactor(  860, 1000,  200,  40, ITK_PAGEDN,
+        AddInteractor(Interactor(  860, 1000,  170,  36, ITK_PAGEDN,
                                    glyphicons_chevron_down,
                                    GetPresetInteractor(STYLE_INTERACTOR) ));
         break;
 
     case ITP_RDP:
 
-        AddInteractor(Interactor( 1650,  900,   70,  70, ITK_CTRL_ALT_BREAK,
+        AddInteractor(Interactor( 1550,  900,   60,  60, ITK_CTRL_ALT_BREAK,
                                   glyphicons_fit_image_to_frame,
                                   GetPresetInteractor(STYLE_INTERACTOR) ));
         break;
 
     case ITP_RDP_FS:
 
-        AddInteractor(Interactor( 1550,  900,   70,  70, ITK_CTRL_ALT_BREAK,
+        AddInteractor(Interactor( 1550,  700,   60,  60, ITK_CTRL_ALT_BREAK,
                                   glyphicons_fit_frame_to_image,
                                   GetPresetInteractor(STYLE_INTERACTOR) ));
 
-        AddInteractor(Interactor( 1650,  900,   70,  70, ITK_CTRL_HOME_WIN_DOWN,
+        AddInteractor(Interactor( 1550,  900,   60,  60, ITK_CTRL_HOME_WIN_DOWN,
                                   glyphicons_disk_import,
                                   GetPresetInteractor(STYLE_INTERACTOR) ));
         break;
@@ -328,7 +328,7 @@ Interactor::Params MainWindow::GetPresetInteractor( int styleId = 0 ) {
     i.clickOnActivation     = true;
     i.suspendOnActivation   = true;
     i.toggleActivation      = false;
-    i.msecActivate          = 1200;
+    i.msecActivate          = 1000;
     i.msecRecovery          = 500;
     i.styleDefault          = "background:rgba(0,0,0,0.6); border:1px solid rgba(0,0,0,0.8); color:rgba(30,136,229,1);";
     i.styleFixate           = "background:qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop: 0 rgba(41,182,246,0.2), stop: %1 rgba(0,0,0,0.6) );border:3px solid rgba(41,182,246,0.8); color:rgba(41,182,246,1);";
@@ -417,11 +417,11 @@ QString MainWindow::GetProcessName( HWND window ) {
 
     HANDLE hProcess = OpenProcess( PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, processId );
 
-    if (NULL != hProcess ) {
+    if (nullptr != hProcess ) {
 
-        GetModuleFileNameEx( hProcess, NULL, buffer, MAX_PATH );
+        GetModuleFileNameEx( hProcess, nullptr, buffer, MAX_PATH );
 
-        HWND hwnd = GetForegroundWindow();
+        //HWND hwnd = GetForegroundWindow();
     }
 
     QString result = QString::fromStdWString( buffer );
@@ -584,24 +584,24 @@ void MainWindow::on_InteractorActivated() {
 
         // send ALT + LEFT
 
-        int key_count = 4;
+        uint key_count = 4;
         INPUT * input = new INPUT[ key_count ];
-        for (int i = 0; i < key_count; i++) {
+        for (uint i = 0; i < key_count; i++) {
             input[i].ki.dwFlags = 0;
             input[i].type = INPUT_KEYBOARD;
             input[i].ki.time = 0;
         }
         input[0].ki.wVk = VK_MENU;
-        input[0].ki.wScan = MapVirtualKey(VK_MENU, MAPVK_VK_TO_VSC);
+        input[0].ki.wScan = static_cast<unsigned short>( MapVirtualKey(VK_MENU, MAPVK_VK_TO_VSC) );
         input[1].ki.wVk = VK_LEFT;
-        input[1].ki.wScan = MapVirtualKey(VK_LEFT, MAPVK_VK_TO_VSC);
+        input[1].ki.wScan = static_cast<unsigned short>( MapVirtualKey(VK_LEFT, MAPVK_VK_TO_VSC) );
         input[2].ki.dwFlags = KEYEVENTF_KEYUP;
         input[2].ki.wVk = input[0].ki.wVk;
         input[2].ki.wScan = input[0].ki.wScan;
         input[3].ki.dwFlags = KEYEVENTF_KEYUP;
         input[3].ki.wVk = input[1].ki.wVk;
         input[3].ki.wScan = input[1].ki.wScan;
-        SendInput(key_count, (LPINPUT)input, sizeof(INPUT));
+        SendInput(key_count, static_cast<LPINPUT>(input), sizeof(INPUT));
 
     }
     if (senderName == ITK_PAGEUP) {
@@ -630,50 +630,48 @@ void MainWindow::on_InteractorActivated() {
 
         // send CTRL + (T)
 
-        int key_count = 8;
+        uint key_count = 4;
         INPUT * input = new INPUT[ key_count ];
-        for (int i = 0; i < key_count; i++) {
+        for (uint i = 0; i < key_count; i++) {
             input[i].ki.dwFlags = 0;
             input[i].type = INPUT_KEYBOARD;
             input[i].ki.time = 0;
         }
         input[0].ki.wVk = VK_CONTROL;
-        input[0].ki.wScan = MapVirtualKey(VK_CONTROL, MAPVK_VK_TO_VSC);
-
+        input[0].ki.wScan = static_cast<unsigned short>( MapVirtualKey(VK_CONTROL, MAPVK_VK_TO_VSC) );
         input[1].ki.wVk = 0x54;
-        input[1].ki.wScan = MapVirtualKey(0x54, MAPVK_VK_TO_VSC);
+        input[1].ki.wScan = static_cast<unsigned short>( MapVirtualKey(0x54, MAPVK_VK_TO_VSC) );
         input[2].ki.dwFlags = KEYEVENTF_KEYUP;
         input[2].ki.wVk = input[1].ki.wVk;
         input[2].ki.wScan = input[1].ki.wScan;
-
-        input[7].ki.dwFlags = KEYEVENTF_KEYUP;
-        input[7].ki.wVk = input[0].ki.wVk;
-        input[7].ki.wScan = input[0].ki.wScan;
-        SendInput(key_count, (LPINPUT)input, sizeof(INPUT));
+        input[3].ki.dwFlags = KEYEVENTF_KEYUP;
+        input[3].ki.wVk = input[0].ki.wVk;
+        input[3].ki.wScan = input[0].ki.wScan;
+        SendInput(key_count, static_cast<LPINPUT>(input), sizeof(INPUT));
 
     }
     if (senderName == ITK_CTRL_F4) {
 
         // send CTRL + F4
 
-        int key_count = 4;
+        uint key_count = 4;
         INPUT * input = new INPUT[ key_count ];
-        for (int i = 0; i < key_count; i++) {
+        for (uint i = 0; i < key_count; i++) {
             input[i].ki.dwFlags = 0;
             input[i].type = INPUT_KEYBOARD;
             input[i].ki.time = 0;
         }
         input[0].ki.wVk = VK_CONTROL;
-        input[0].ki.wScan = MapVirtualKey(VK_CONTROL, MAPVK_VK_TO_VSC);
+        input[0].ki.wScan = static_cast<unsigned short>( MapVirtualKey(VK_CONTROL, MAPVK_VK_TO_VSC) );
         input[1].ki.wVk = VK_F4;
-        input[1].ki.wScan = MapVirtualKey(VK_F4, MAPVK_VK_TO_VSC);
+        input[1].ki.wScan = static_cast<unsigned short>( MapVirtualKey(VK_F4, MAPVK_VK_TO_VSC) );
         input[2].ki.dwFlags = KEYEVENTF_KEYUP;
         input[2].ki.wVk = input[0].ki.wVk;
         input[2].ki.wScan = input[0].ki.wScan;
         input[3].ki.dwFlags = KEYEVENTF_KEYUP;
         input[3].ki.wVk = input[1].ki.wVk;
         input[3].ki.wScan = input[1].ki.wScan;
-        SendInput(key_count, (LPINPUT)input, sizeof(INPUT));
+        SendInput(key_count, static_cast<LPINPUT>(input), sizeof(INPUT));
     }
     if (senderName == ITK_ESC) {
 
@@ -734,19 +732,19 @@ void MainWindow::on_InteractorActivated() {
 
         // send (ctrl+alt)+break
 
-        int key_count = 6;
+        uint key_count = 6;
         INPUT * input = new INPUT[ key_count ];
-        for (int i = 0; i < key_count; i++) {
+        for (uint i = 0; i < key_count; i++) {
             input[i].ki.dwFlags = 0;
             input[i].type = INPUT_KEYBOARD;
             input[i].ki.time = 0;
         }
         input[0].ki.wVk = VK_CONTROL;
-        input[0].ki.wScan = MapVirtualKey(VK_CONTROL, MAPVK_VK_TO_VSC);
+        input[0].ki.wScan = static_cast<unsigned short>( MapVirtualKey(VK_CONTROL, MAPVK_VK_TO_VSC) );
         input[1].ki.wVk = VK_MENU;
-        input[1].ki.wScan = MapVirtualKey(VK_MENU, MAPVK_VK_TO_VSC);
+        input[1].ki.wScan = static_cast<unsigned short>( MapVirtualKey(VK_MENU, MAPVK_VK_TO_VSC) );
         input[2].ki.wVk = VK_CANCEL;
-        input[2].ki.wScan = MapVirtualKey(VK_CANCEL, MAPVK_VK_TO_VSC);
+        input[2].ki.wScan = static_cast<unsigned short>( MapVirtualKey(VK_CANCEL, MAPVK_VK_TO_VSC) );
         input[3].ki.dwFlags = KEYEVENTF_KEYUP;
         input[3].ki.wVk = input[0].ki.wVk;
         input[3].ki.wScan = input[0].ki.wScan;
@@ -756,25 +754,24 @@ void MainWindow::on_InteractorActivated() {
         input[5].ki.dwFlags = KEYEVENTF_KEYUP;
         input[5].ki.wVk = input[2].ki.wVk;
         input[5].ki.wScan = input[2].ki.wScan;
-
-        SendInput(key_count, (LPINPUT)input, sizeof(INPUT));
+        SendInput(key_count, static_cast<LPINPUT>(input), sizeof(INPUT));
 
     }
     if (senderName == ITK_CTRL_HOME_WIN_DOWN) {
 
         // send (ctrl+home),(win+down)
 
-        int key_count = 8;
+        uint key_count = 8;
         INPUT * input = new INPUT[ key_count ];
-        for (int i = 0; i < key_count; i++) {
+        for (uint i = 0; i < key_count; i++) {
             input[i].ki.dwFlags = 0;
             input[i].type = INPUT_KEYBOARD;
             input[i].ki.time = 0;
         }
         input[0].ki.wVk = VK_CONTROL;
-        input[0].ki.wScan = MapVirtualKey(VK_CONTROL, MAPVK_VK_TO_VSC);
+        input[0].ki.wScan = static_cast<unsigned short>( MapVirtualKey(VK_CONTROL, MAPVK_VK_TO_VSC) );
         input[1].ki.wVk = VK_HOME;
-        input[1].ki.wScan = MapVirtualKey(VK_HOME, MAPVK_VK_TO_VSC);
+        input[1].ki.wScan = static_cast<unsigned short>( MapVirtualKey(VK_HOME, MAPVK_VK_TO_VSC) );
         input[2].ki.dwFlags = KEYEVENTF_KEYUP;
         input[2].ki.wVk = input[0].ki.wVk;
         input[2].ki.wScan = input[0].ki.wScan;
@@ -782,16 +779,16 @@ void MainWindow::on_InteractorActivated() {
         input[3].ki.wVk = input[1].ki.wVk;
         input[3].ki.wScan = input[1].ki.wScan;
         input[4].ki.wVk = VK_LWIN;
-        input[4].ki.wScan = MapVirtualKey(VK_LWIN, MAPVK_VK_TO_VSC);
+        input[4].ki.wScan = static_cast<unsigned short>( MapVirtualKey(VK_LWIN, MAPVK_VK_TO_VSC) );
         input[5].ki.wVk = VK_DOWN;
-        input[5].ki.wScan = MapVirtualKey(VK_DOWN, MAPVK_VK_TO_VSC);
+        input[5].ki.wScan = static_cast<unsigned short>( MapVirtualKey(VK_DOWN, MAPVK_VK_TO_VSC) );
         input[6].ki.dwFlags = KEYEVENTF_KEYUP;
         input[6].ki.wVk = input[4].ki.wVk;
         input[6].ki.wScan = input[4].ki.wScan;
         input[7].ki.dwFlags = KEYEVENTF_KEYUP;
         input[7].ki.wVk = input[5].ki.wVk;
         input[7].ki.wScan = input[5].ki.wScan;
-        SendInput(key_count, (LPINPUT)input, sizeof(INPUT));
+        SendInput(key_count, static_cast<LPINPUT>(input), sizeof(INPUT));
 
     }
 }
@@ -833,10 +830,9 @@ void MainWindow::ToggleMouse() {
             : EyeXHost::Mouse::Off;
 
     if (eyes.mouse == EyeXHost::Mouse::Off) {
-
     } else {
-
     }
+
     UpdateActivatableRegions();
 }
 
@@ -1078,7 +1074,7 @@ void MainWindow::ShowBci( bool visible ) {
             a->start(QPropertyAnimation::DeleteWhenStopped);
 
             ui->frameBci->show();
-            ui->frameBci->setGraphicsEffect(NULL);
+            ui->frameBci->setGraphicsEffect(nullptr);
         }
 
     } else {
@@ -1155,7 +1151,7 @@ void MainWindow::on_hotkey_pressed( const char * _key ) {
 
 void MainWindow::on_buttonMouse_clicked(){
 
-    ToggleMouse();
+    ToggleMouse( );
 }
 
 
@@ -1215,3 +1211,4 @@ void MainWindow::on_buttonBci_clicked() {
 
     SlideMenu(3);
 }
+

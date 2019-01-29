@@ -210,7 +210,7 @@ void EyeXHost::HandleQuery(TX_CONSTHANDLE hAsyncData) {
     TX_CHAR windowId[bufferSize];
     TX_CHAR regionId[bufferSize];
 
-    sprintf(windowId, "%d", reinterpret_cast<std::uintptr_t>(_hWnd));
+    //sprintf(windowId, "%d", reinterpret_cast<std::uintptr_t>(_hWnd));
 
     // read the query bounds from the query, the area on the screen that the query concerns
 
@@ -430,8 +430,6 @@ void EyeXHost::OnGazeEvent(int X, int Y) {
         FillRect(dc, &rect, brush);
 
     } else if (mouse == Mouse::Control) {
-
-        //QCursor::setPos(emaX, emaY);
 
         INPUT im;
         im.type = INPUT_MOUSE;
