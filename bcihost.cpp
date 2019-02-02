@@ -13,13 +13,14 @@ BciHost::BciHost(QObject *parent) : QObject(parent) {
 
 BciHost::~BciHost() {
 
+    delete socket;
 }
 
 
 void BciHost::readyRead() {
 
     QByteArray buffer;
-    buffer.resize( socket->pendingDatagramSize() );
+    buffer.resize( static_cast<int>(socket->pendingDatagramSize()) );
 
     QHostAddress sender;
     quint16 senderPort;
@@ -32,6 +33,56 @@ void BciHost::readyRead() {
 
     socket->readDatagram(buffer.data(), buffer.size(), &sender, &senderPort);
 
-    //qDebug() << sender.toString() << senderPort << buffer;
-    qDebug() << buffer;
+    QJsonDocument json_doc = QJsonDocument::fromJson(buffer);
+
+    if ( (json_doc.isNull()) || (!json_doc.isObject()) )
+        return;
+
+    QJsonObject json_obj = json_doc.object();
+
+    if (json_obj.isEmpty())
+        return;
+
+    QVariantMap json_map = json_obj.toVariantMap();
+
+    QString data_type = json_map["type"].toString();
+
+    if (data_type == "eeg")
+        receiveEeg( json_map["data"].toList() );
+
+    if (data_type == "fft")
+        receiveFft( json_map["data"].toList() );
+
+    //qDebug() << qPrintable( json_map["type"].toString() );
+}
+
+
+void BciHost::receiveEeg( QVariantList channels ) {
+
+    QString out = "";
+
+    for( int i=0; i < channels.count(); ++i ) {
+
+        out.append( channels[i].toString() );
+        out.append( " " );
+    }
+    qDebug() << qPrintable( out );
+}
+
+
+void BciHost::receiveFft( QVariantList channels ) {
+
+    for( int i=0; i < channels.count(); ++i ) {
+
+        QVariantList fft = channels[i].toList();
+
+        QString out = "";
+
+        for( int j=0; j < 20; ++j ) {
+
+            out.append( fft[j].toString() );
+            out.append( " " );
+        }
+        qDebug() << qPrintable( out );
+    }
 }

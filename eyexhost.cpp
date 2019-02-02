@@ -154,9 +154,9 @@ void EyeXHost::OnEngineConnectionStateChanged(TX_CONNECTIONSTATE connectionState
 
             bool success = txCommitSnapshotAsync(_gazeInteractorSnapshot, OnSnapshotCommitted, this) == TX_RESULT_OK;
             if (!success) {
-                qDebug() << "Gaze stream failed";
+                qDebug() << "EyeX Gaze stream failed";
             } else {
-                qDebug() << "Gaze stream started";
+                qDebug() << "EyeX Gaze stream started";
             }
         }
         break;
@@ -210,7 +210,7 @@ void EyeXHost::HandleQuery(TX_CONSTHANDLE hAsyncData) {
     TX_CHAR windowId[bufferSize];
     TX_CHAR regionId[bufferSize];
 
-    //sprintf(windowId, "%d", reinterpret_cast<std::uintptr_t>(_hWnd));
+    sprintf(windowId, "%d", reinterpret_cast<std::uintptr_t>(_hWnd));
 
     // read the query bounds from the query, the area on the screen that the query concerns
 

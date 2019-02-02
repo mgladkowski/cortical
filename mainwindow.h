@@ -22,6 +22,7 @@
 #include "eyebutton.h"
 #include "interactor.h"
 #include "glyphicons.h"
+#include "heatmap.h"
 
 
 #define MENU_START              0
@@ -51,6 +52,8 @@ public:
 private:
 
     Ui::MainWindow  *ui;
+
+    HeatMap     *heatmap;
 
     QFont       iconFont;
     QTimer      systemTimer;

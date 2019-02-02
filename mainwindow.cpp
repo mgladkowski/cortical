@@ -36,6 +36,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 MainWindow::~MainWindow() {
 
+    delete heatmap;
     delete ui;
 }
 
@@ -110,7 +111,20 @@ void MainWindow::InitializeUi() {
     ui->frameOp->hide();
     ui->frameEye->hide();
     ui->frameBci->hide();
+
     ui->frameSlider->move(MENU_START, ui->frameSlider->y());
+
+    // BCI heatmap
+
+    heatmap = new HeatMap();
+    heatmap->resize(400,125);
+    heatmap->move(50,900);
+
+    QLayout *layout = this->layout();
+    layout->addWidget(heatmap);
+    setLayout(layout);
+
+    // done
 
     UpdateActivatableRegions();
 }

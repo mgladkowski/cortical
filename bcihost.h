@@ -3,6 +3,9 @@
 
 #include <QObject>
 #include <QCursor>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
 #include <QUdpSocket>
 #include <windows.h>
 
@@ -33,6 +36,8 @@ private:
 
     QUdpSocket  *socket;
 
+    void        receiveEeg( QVariantList channels );
+    void        receiveFft( QVariantList channels );
 
 public slots:
 
