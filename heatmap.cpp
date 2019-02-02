@@ -4,16 +4,8 @@ HeatMap::HeatMap(QWidget *parent) : QWidget(parent) {
 
     //setBackgroundRole(QPalette::Base);
     //setAutoFillBackground(true);
-
     memset(data, 0, sizeof(data));
-
     timer.start(33, this);
-
-    //int x[5] = { 5, 4, 3, 2, 1 };
-    //qDebug() << x[0] << x[1] << x[2] << x[3] << x[4];
-    //std::rotate(x, x+4, x+5);
-    //x[0] = 6;
-    //qDebug() << x[0] << x[1] << x[2] << x[3] << x[4];
 }
 
 
@@ -35,21 +27,39 @@ void HeatMap::paintEvent(QPaintEvent *) {
     QPen     pen;
     QPoint   point[1];
 
-    for (int x=0; x < 400; x++) {
+    double   bp[10] = {3, 4, 5, 7, 9, 10, 13, 20, 50, 100};
 
-        for (int y=0; y < 125; y++) {
+    for (int t=0; t < 400; t++) {
 
-            point[0] = QPoint(x,y);
+        for (int f=0; f < 100; f++) {
 
-            if ( HeatMap::isDoubleEqual( data[x][y], 0.0 ) ) {
+            point[0] = QPoint(t,f);
+
+            if ( HeatMap::isDoubleEqual( data[f][t], 0.0 ) ) {
                 pen = QPen(Qt::black);
-            } else {
+            } else if ( data[f][t] < bp[0] ) {
+                pen = QPen(Qt::black);
+            } else if ( data[f][t] < bp[1] ) {
+                pen = QPen(Qt::darkRed);
+            } else if ( data[f][t] < bp[2] ) {
+                pen = QPen(Qt::red);
+            } else if ( data[f][t] < bp[3] ) {
+                pen = QPen(Qt::yellow);
+            } else if ( data[f][t] < bp[4] ) {
+                pen = QPen(Qt::green);
+            } else if ( data[f][t] < bp[5] ) {
+                pen = QPen(Qt::cyan);
+            } else if ( data[f][t] < bp[6] ) {
+                pen = QPen(Qt::blue);
+            } else if ( data[f][t] < bp[7] ) {
+                pen = QPen(Qt::darkMagenta);
+            } else if ( data[f][t] < bp[8] ) {
+                pen = QPen(Qt::magenta);
+            } else if ( data[f][t] >= bp[9] ) {
                 pen = QPen(Qt::white);
             }
-
             painter.setPen(pen);
             painter.drawPoints(point, 1);
-
         }
     }
 }
@@ -65,9 +75,13 @@ void HeatMap::timerEvent(QTimerEvent *event) {
 }
 
 
-void HeatMap::fftEvent(double data[125]){
+void HeatMap::fftEvent(double packet[125]){
 
-    Q_UNUSED(data);
+    for (int f=0; f < 125; f++) {
+
+        std::rotate(data[f], data[f]+399, data[f]+400);
+        data[f][0] = packet[f];
+    }
 }
 
 

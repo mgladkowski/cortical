@@ -39,6 +39,11 @@ private:
     void        receiveEeg( QVariantList channels );
     void        receiveFft( QVariantList channels );
 
+signals:
+
+    void        eegEvent(double packet[4]);
+    void        fftEvent(double packet[125]);
+
 public slots:
 
     void        readyRead();

@@ -26,14 +26,17 @@ protected:
 
     void        paintEvent(QPaintEvent *event) override;
     void        timerEvent(QTimerEvent *event) override;
-    void        dataEvent(double data[125]);
 
 private:
 
     QBasicTimer timer;
-    double      data[400][125];
+    double      data[125][400];
 
     bool        isDoubleEqual(double a, double b);
+
+public slots:
+
+    void        fftEvent( double[125] );
 };
 
 #endif // HEATMAP_H

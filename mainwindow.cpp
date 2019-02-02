@@ -14,8 +14,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     setAttribute(Qt::WA_TranslucentBackground, true);
 
     ui->setupUi(this);
-
     InitializeUi();
+
+    // initialize eyes
 
     eyes.Init( reinterpret_cast<HWND>(this->winId()) );
 
@@ -30,7 +31,20 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
                 &systemTimer, SIGNAL(timeout()),
                 this, SLOT(on_SystemTimer())
     );
+
     systemTimer.start( 1000 );
+
+    // initialize brain
+
+    QObject::connect(
+                &brain, SIGNAL(eegEvent(double[4])),
+                this, SLOT(on_eegEvent(double[4]))
+    );
+    QObject::connect(
+                &brain, SIGNAL(fftEvent(double[125])),
+                heatmap, SLOT(fftEvent(double[125]))
+    );
+
 }
 
 
@@ -834,6 +848,18 @@ void MainWindow::on_UserPresenceChanged( bool present ) {
 
     userPresent = present;
     ShowAll( userPresent );
+}
+
+
+void MainWindow::on_eegEvent( double packet[4] ) {
+
+    qDebug() << "on_eegEvent";
+}
+
+
+void MainWindow::on_fftEvent( double packet[125] ) {
+
+    qDebug() << "on_fftEvent";
 }
 
 

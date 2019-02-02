@@ -25,23 +25,15 @@ void BciHost::readyRead() {
     QHostAddress sender;
     quint16 senderPort;
 
-    // qint64 QUdpSocket::readDatagram(char * data, qint64 maxSize,
-    //                 QHostAddress * address = 0, quint16 * port = 0)
-    // Receives a datagram no larger than maxSize bytes and stores it in data.
-    // The sender's host address and port is stored in *address and *port
-    // (unless the pointers are 0).
-
     socket->readDatagram(buffer.data(), buffer.size(), &sender, &senderPort);
 
     QJsonDocument json_doc = QJsonDocument::fromJson(buffer);
 
-    if ( (json_doc.isNull()) || (!json_doc.isObject()) )
-        return;
+    if ( (json_doc.isNull()) || (!json_doc.isObject()) ) return;
 
     QJsonObject json_obj = json_doc.object();
 
-    if (json_obj.isEmpty())
-        return;
+    if (json_obj.isEmpty()) return;
 
     QVariantMap json_map = json_obj.toVariantMap();
 
@@ -52,37 +44,35 @@ void BciHost::readyRead() {
 
     if (data_type == "fft")
         receiveFft( json_map["data"].toList() );
-
-    //qDebug() << qPrintable( json_map["type"].toString() );
 }
 
 
 void BciHost::receiveEeg( QVariantList channels ) {
 
-    QString out = "";
+    if (channels.count() < 4) return;
+    double packet[4];
 
-    for( int i=0; i < channels.count(); ++i ) {
+    for( int i=0; i < 4; ++i ) {
 
-        out.append( channels[i].toString() );
-        out.append( " " );
+        packet[i] = channels[i].toDouble();
     }
-    qDebug() << qPrintable( out );
+    emit eegEvent( packet );
 }
 
 
 void BciHost::receiveFft( QVariantList channels ) {
 
-    for( int i=0; i < channels.count(); ++i ) {
+    if (channels.count() < 4) return;
 
-        QVariantList fft = channels[i].toList();
+    int selected = 2;
+    QVariantList fft = channels[selected].toList();
 
-        QString out = "";
+    if (fft.count() < 125) return;
+    double  packet[125];
 
-        for( int j=0; j < 20; ++j ) {
+    for( int i=0; i < 125; ++i ) {
 
-            out.append( fft[j].toString() );
-            out.append( " " );
-        }
-        qDebug() << qPrintable( out );
+        packet[i] = fft[i].toDouble();
     }
+    emit fftEvent( packet );
 }

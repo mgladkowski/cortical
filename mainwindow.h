@@ -110,6 +110,8 @@ public slots:
     void        on_FadeBciFinished();
     void        on_SystemTimer();
     void        on_UserPresenceChanged( bool present );
+    void        on_eegEvent( double packet[4] );
+    void        on_fftEvent( double packet[125] );
 
 
 private slots:
