@@ -1,15 +1,15 @@
 #ifndef HEATMAP_H
 #define HEATMAP_H
 
-#include <algorithm>
-#include <cmath>
-#include <cfloat>
 #include <QBasicTimer>
 #include <QDebug>
+#include <QLinearGradient>
 #include <QPainter>
 #include <QPen>
 #include <QTimerEvent>
 #include <QWidget>
+#include "helpers.h"
+#include "heatgradient.h"
 
 
 class HeatMap : public QWidget {
@@ -29,10 +29,10 @@ protected:
 
 private:
 
-    QBasicTimer timer;
-    double      data[125][400];
+    QBasicTimer  timer;
+    HeatGradient gradient;
+    double       data[125][400];
 
-    bool        isDoubleEqual(double a, double b);
 
 public slots:
 

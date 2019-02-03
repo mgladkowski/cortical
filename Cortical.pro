@@ -46,7 +46,9 @@ SOURCES += \
     eyexhost.cpp \
     bcihost.cpp \
     eyebutton.cpp \
-    heatmap.cpp
+    heatmap.cpp \
+    heatgradient.cpp \
+    helpers.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -57,7 +59,9 @@ HEADERS += \
     glyphicons.h \
     interactor.h \
     enums.h \
-    heatmap.h
+    heatmap.h \
+    heatgradient.h \
+    helpers.h
 
 FORMS += \
         mainwindow.ui

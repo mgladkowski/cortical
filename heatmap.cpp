@@ -2,8 +2,7 @@
 
 HeatMap::HeatMap(QWidget *parent) : QWidget(parent) {
 
-    //setBackgroundRole(QPalette::Base);
-    //setAutoFillBackground(true);
+    gradient = HeatGradient();
     memset(data, 0, sizeof(data));
     timer.start(33, this);
 }
@@ -31,33 +30,45 @@ void HeatMap::paintEvent(QPaintEvent *) {
 
     for (int t=0; t < 400; t++) {
 
-        for (int f=0; f < 100; f++) {
+        for (int f=0; f < 60; f++) {
 
-            point[0] = QPoint(t,f);
+            point[0] = QPoint(t*2,f*2);
 
-            if ( HeatMap::isDoubleEqual( data[f][t], 0.0 ) ) {
-                pen = QPen(Qt::black);
+            double nval = 0.0;
+
+            if ( Helpers::isDoubleEqual( data[f][t], 0.0 ) ) {
+                nval = 0.0;
             } else if ( data[f][t] < bp[0] ) {
-                pen = QPen(Qt::black);
+                nval = 0.1;
             } else if ( data[f][t] < bp[1] ) {
-                pen = QPen(Qt::darkRed);
+                nval = 0.2;
             } else if ( data[f][t] < bp[2] ) {
-                pen = QPen(Qt::red);
+                nval = 0.3;
             } else if ( data[f][t] < bp[3] ) {
-                pen = QPen(Qt::yellow);
+                nval = 0.4;
             } else if ( data[f][t] < bp[4] ) {
-                pen = QPen(Qt::green);
+                nval = 0.5;
             } else if ( data[f][t] < bp[5] ) {
-                pen = QPen(Qt::cyan);
+                nval = 0.6;
             } else if ( data[f][t] < bp[6] ) {
-                pen = QPen(Qt::blue);
+                nval = 0.7;
             } else if ( data[f][t] < bp[7] ) {
-                pen = QPen(Qt::darkMagenta);
+                nval = 0.8;
             } else if ( data[f][t] < bp[8] ) {
-                pen = QPen(Qt::magenta);
+                nval = 0.9;
             } else if ( data[f][t] >= bp[9] ) {
-                pen = QPen(Qt::white);
+                nval = 1.0;
             }
+
+            float _r,_g,_b;
+            gradient.getColorAtValue( static_cast<float>(nval), _r, _g, _b);
+            int r,g,b;
+            r = static_cast<int>(255 * _r);
+            g = static_cast<int>(255 * _g);
+            b = static_cast<int>(255 * _b);
+
+            pen = QPen(QColor(r,g,b,96));
+            pen.setWidth(2);
             painter.setPen(pen);
             painter.drawPoints(point, 1);
         }
@@ -82,10 +93,4 @@ void HeatMap::fftEvent(double packet[125]){
         std::rotate(data[f], data[f]+399, data[f]+400);
         data[f][0] = packet[f];
     }
-}
-
-
-bool HeatMap::isDoubleEqual(double a, double b) {
-
-    return fabs(a - b) < DBL_EPSILON;
 }

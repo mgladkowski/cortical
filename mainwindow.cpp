@@ -131,8 +131,8 @@ void MainWindow::InitializeUi() {
     // BCI heatmap
 
     heatmap = new HeatMap();
-    heatmap->resize(400,125);
-    heatmap->move(50,900);
+    heatmap->resize(800,120);
+    heatmap->move(1100,900);
 
     QLayout *layout = this->layout();
     layout->addWidget(heatmap);
