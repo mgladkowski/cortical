@@ -22,12 +22,13 @@
 #include "eyebutton.h"
 #include "interactor.h"
 #include "glyphicons.h"
+#include "gazepoint.h"
 #include "heatmap.h"
-
 
 #define MENU_START              0
 #define MENU_SPACE              260
-
+#define HEATMAP_INITIAL_X       1700
+#define HEATMAP_INITIAL_Y       900
 
 namespace Ui {
 class MainWindow;
@@ -54,6 +55,7 @@ private:
     Ui::MainWindow  *ui;
 
     HeatMap     *heatmap;
+    GazePoint   *gazepoint;
 
     QFont       iconFont;
     QTimer      systemTimer;
@@ -80,6 +82,7 @@ private:
     void        SuppressEyes( int msec );
 
     void        ToggleMouse();
+    void        ToggleGaze();
     void        ToggleBrain();
     void        ToggleMenu();
 
@@ -110,6 +113,7 @@ public slots:
     void        on_FadeBciFinished();
     void        on_SystemTimer();
     void        on_UserPresenceChanged( bool present );
+    void        on_gazeEvent( int X, int Y );
     void        on_eegEvent( double packet[4] );
     void        on_fftEvent( double packet[125] );
 
@@ -122,7 +126,6 @@ private slots:
 
     void        on_buttonMouse_clicked();
     void        on_buttonMain_clicked();
-
     void        on_buttonOp_clicked();
     void        on_buttonOp1_clicked();
     void        on_buttonOp2_clicked();

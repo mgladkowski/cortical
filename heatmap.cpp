@@ -10,13 +10,13 @@ HeatMap::HeatMap(QWidget *parent) : QWidget(parent) {
 
 QSize HeatMap::minimumSizeHint() const {
 
-    return QSize(100, 125);
+    return QSize(100, 100);
 }
 
 
 QSize HeatMap::sizeHint() const {
 
-    return QSize(400, 125);
+    return QSize(200, 100);
 }
 
 
@@ -26,9 +26,9 @@ void HeatMap::paintEvent(QPaintEvent *) {
     QPen     pen;
     QPoint   point[1];
 
-    double   bp[10] = {3, 4, 5, 7, 9, 10, 13, 20, 50, 100};
+    double   bp[10] = {3, 5, 7, 10, 15, 20, 30, 40, 60, 100};
 
-    for (int t=0; t < 400; t++) {
+    for (int t=0; t < 200; t++) {
 
         for (int f=0; f < 60; f++) {
 
@@ -90,7 +90,7 @@ void HeatMap::fftEvent(double packet[125]){
 
     for (int f=0; f < 125; f++) {
 
-        std::rotate(data[f], data[f]+399, data[f]+400);
+        std::rotate(data[f], data[f]+199, data[f]+200);
         data[f][0] = packet[f];
     }
 }

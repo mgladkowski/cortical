@@ -2,19 +2,19 @@
 
 
 EyeXHost::EyeXHost(QObject *parent) : QObject(parent),
-    _hWnd(nullptr),
-    _context(TX_EMPTY_HANDLE),
-    _connectionStateChangedTicket(0),
-    _stateHandlerTicket(0),
-    _queryHandlerTicket(0),
-    _eventHandlerTicket(0),
-    _gazeInteractorId((char *)"100"),
-    _gazeInteractorSnapshot(TX_EMPTY_HANDLE),
+    _hWnd( nullptr ),
+    _context( TX_EMPTY_HANDLE ),
+    _connectionStateChangedTicket( 0 ),
+    _stateHandlerTicket( 0 ),
+    _queryHandlerTicket( 0 ),
+    _eventHandlerTicket( 0 ),
+    _gazeInteractorId( (char *)"100" ),
+    _gazeInteractorSnapshot( TX_EMPTY_HANDLE ),
     _state(Initializing) {
 
 
     mouse           = Mouse::Off;
-    ema_size        = 20;
+    ema_size        = 22;
     ema_multiplier  = 2.0 / (ema_size + 1);
     gazeX           = 0;
     gazeY           = 0;
@@ -89,7 +89,7 @@ bool EyeXHost::InitializeGlobalInteractorSnapshot() {
 
     TX_HANDLE hInteractor = TX_EMPTY_HANDLE;
     TX_GAZEPOINTDATAPARAMS paramsGaze = { TX_GAZEPOINTDATAMODE_LIGHTLYFILTERED };
-    TX_FIXATIONDATAPARAMS paramsFixation = { TX_FIXATIONDATAMODE_SENSITIVE };
+    //TX_FIXATIONDATAPARAMS paramsFixation = { TX_FIXATIONDATAMODE_SENSITIVE };
 
     bool success;
 
@@ -219,7 +219,10 @@ void EyeXHost::HandleQuery(TX_CONSTHANDLE hAsyncData) {
     TX_REAL pX, pY, pWidth, pHeight;
     txGetRectangularBoundsData(hBounds, &pX, &pY, &pWidth, &pHeight);
     txReleaseObject(&hBounds);
-    Gdiplus::Rect queryBounds((INT)pX, (INT)pY, (INT)pWidth, (INT)pHeight);
+    Gdiplus::Rect queryBounds(static_cast<int>(pX),
+                              static_cast<int>(pY),
+                              static_cast<int>(pWidth),
+                              static_cast<int>(pHeight));
 
     // create a new snapshot with the same window id and bounds as the query
 
@@ -237,10 +240,10 @@ void EyeXHost::HandleQuery(TX_CONSTHANDLE hAsyncData) {
         for (auto region : _regions) {
 
             Gdiplus::Rect regionBounds(
-                        (INT)region.bounds.left,
-                        (INT)region.bounds.top,
-                        (INT)(region.bounds.right - region.bounds.left),
-                        (INT)(region.bounds.bottom - region.bounds.top));
+                        static_cast<int>(region.bounds.left),
+                        static_cast<int>(region.bounds.top),
+                        static_cast<int>((region.bounds.right - region.bounds.left)),
+                        static_cast<int>((region.bounds.bottom - region.bounds.top)));
 
             if (queryBounds.IntersectsWith(regionBounds)) {
 
@@ -348,6 +351,7 @@ void EyeXHost::HandleEvent(TX_CONSTHANDLE hAsyncData) {
 
 void TX_CALLCONVENTION EyeXHost::OnSnapshotCommitted(TX_CONSTHANDLE hAsyncData, TX_USERPARAM param) {
 
+    Q_UNUSED(param);
     TX_RESULT result = TX_RESULT_UNKNOWN;
     txGetAsyncDataResultCode(hAsyncData, &result);
     assert(result == TX_RESULT_OK || result == TX_RESULT_CANCELLED);
@@ -394,7 +398,7 @@ void EyeXHost::TriggerActivation() {
 
     TX_HANDLE command(TX_EMPTY_HANDLE);
     txCreateActionCommand(_context, &command, TX_ACTIONTYPE_ACTIVATE);
-    txExecuteCommandAsync(command, NULL, NULL);
+    txExecuteCommandAsync(command, nullptr, nullptr);
     txReleaseObject(&command);
 }
 
@@ -403,7 +407,7 @@ void EyeXHost::TriggerActivationModeOn()
 {
     TX_HANDLE command(TX_EMPTY_HANDLE);
     txCreateActionCommand(_context, &command, TX_ACTIONTYPE_ACTIVATIONMODEON);
-    txExecuteCommandAsync(command, NULL, NULL);
+    txExecuteCommandAsync(command, nullptr, nullptr);
     txReleaseObject(&command);
 }
 
@@ -418,16 +422,16 @@ void EyeXHost::OnGazeEvent(int X, int Y) {
     gazeX = X;
     gazeY = Y;
 
-    emaX = ((gazeX - emaX) * ema_multiplier) + emaX;
-    emaY = ((gazeY - emaY) * ema_multiplier) + emaY;
+    emaX = static_cast<int>( ((gazeX - emaX) * ema_multiplier) + emaX );
+    emaY = static_cast<int>( ((gazeY - emaY) * ema_multiplier) + emaY );
 
     if (mouse == Mouse::Gaze) {
 
-        HWND desktop = GetDesktopWindow();
-        HDC dc = GetDC(desktop);
-        RECT rect = { emaX, emaY, emaX+1, emaY+1  };
-        HBRUSH brush = CreateSolidBrush( RGB(128, 255, 255) );
-        FillRect(dc, &rect, brush);
+//        HWND desktop = GetDesktopWindow();
+//        HDC dc = GetDC(desktop);
+//        RECT rect = { emaX, emaY, emaX+1, emaY+1  };
+//        HBRUSH brush = CreateSolidBrush( RGB(128, 255, 255) );
+//        FillRect(dc, &rect, brush);
 
     } else if (mouse == Mouse::Control) {
 
@@ -468,5 +472,6 @@ void EyeXHost::OnActivationFocusChanged(TX_HANDLE hBehavior, int interactorId) {
 
 void EyeXHost::OnActivated(TX_HANDLE hBehavior, int interactorId) {
 
+    Q_UNUSED(hBehavior);
     emit ActivationEvent( interactorId );
 }

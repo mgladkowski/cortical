@@ -48,7 +48,8 @@ SOURCES += \
     eyebutton.cpp \
     heatmap.cpp \
     heatgradient.cpp \
-    helpers.cpp
+    helpers.cpp \
+    gazepoint.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -61,7 +62,8 @@ HEADERS += \
     enums.h \
     heatmap.h \
     heatgradient.h \
-    helpers.h
+    helpers.h \
+    gazepoint.h
 
 FORMS += \
         mainwindow.ui

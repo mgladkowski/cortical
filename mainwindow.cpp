@@ -22,35 +22,34 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     userPresent = true;
 
-    QObject::connect(
-                &eyes, SIGNAL(UserPresenceChanged(bool)),
-                this, SLOT(on_UserPresenceChanged(bool))
+    QObject::connect( &eyes, SIGNAL(UserPresenceChanged( bool )),
+                      this, SLOT(on_UserPresenceChanged( bool ))
     );
 
-    QObject::connect(
-                &systemTimer, SIGNAL(timeout()),
-                this, SLOT(on_SystemTimer())
+    QObject::connect( &eyes, SIGNAL(GazeEvent( int, int )),
+                      this, SLOT(on_gazeEvent( int, int ))
+    );
+
+    QObject::connect( &brain, SIGNAL(eegEvent( double[4] )),
+                      this, SLOT(on_eegEvent( double[4] ))
+    );
+
+    QObject::connect( &brain, SIGNAL(fftEvent( double[125] )),
+                      heatmap, SLOT(fftEvent( double[125] ))
+    );
+
+    QObject::connect( &systemTimer, SIGNAL(timeout()),
+                      this, SLOT(on_SystemTimer())
     );
 
     systemTimer.start( 1000 );
-
-    // initialize brain
-
-    QObject::connect(
-                &brain, SIGNAL(eegEvent(double[4])),
-                this, SLOT(on_eegEvent(double[4]))
-    );
-    QObject::connect(
-                &brain, SIGNAL(fftEvent(double[125])),
-                heatmap, SLOT(fftEvent(double[125]))
-    );
-
 }
 
 
 MainWindow::~MainWindow() {
 
     delete heatmap;
+    delete gazepoint;
     delete ui;
 }
 
@@ -90,17 +89,14 @@ void MainWindow::InitializeUi() {
 
         if (b->isInteractor == false) {
 
-            QObject::connect(
-                        &eyes, SIGNAL(ActivationEvent(int)),
-                        b, SLOT(on_ActivationEvent(int))
+            QObject::connect( &eyes, SIGNAL(ActivationEvent(int)),
+                              b, SLOT(on_ActivationEvent(int))
             );
-            QObject::connect(
-                        &eyes, SIGNAL(ActivationFocusEvent(int)),
-                        b, SLOT(on_ActivationFocusEvent(int))
+            QObject::connect( &eyes, SIGNAL(ActivationFocusEvent(int)),
+                              b, SLOT(on_ActivationFocusEvent(int))
             );
-            QObject::connect(
-                        b, SIGNAL(ActivationEvent(int)),
-                        this, SLOT(on_ActivationEvent(int))
+            QObject::connect( b, SIGNAL(ActivationEvent(int)),
+                              this, SLOT(on_ActivationEvent(int))
             );
             b->setFont(iconFont);
             b->setStyle( buttonStyle );
@@ -128,13 +124,20 @@ void MainWindow::InitializeUi() {
 
     ui->frameSlider->move(MENU_START, ui->frameSlider->y());
 
+    // gazepoint
+
+    gazepoint = new GazePoint();
+    gazepoint->resize(gazepoint->sizeHint());
+    gazepoint->move(1,1);
+
     // BCI heatmap
 
     heatmap = new HeatMap();
-    heatmap->resize(800,120);
-    heatmap->move(1100,900);
+    heatmap->resize(heatmap->sizeHint());
+    heatmap->move(HEATMAP_INITIAL_X,HEATMAP_INITIAL_Y);
 
     QLayout *layout = this->layout();
+    layout->addWidget(gazepoint);
     layout->addWidget(heatmap);
     setLayout(layout);
 
@@ -851,26 +854,48 @@ void MainWindow::on_UserPresenceChanged( bool present ) {
 }
 
 
+void MainWindow::on_gazeEvent( int X, int Y ) {
+
+    Q_UNUSED(X);
+    Q_UNUSED(Y);
+    gazepoint->move(eyes.emaX - 8, eyes.emaY - 8);
+}
+
+
 void MainWindow::on_eegEvent( double packet[4] ) {
 
+    Q_UNUSED(packet);
     qDebug() << "on_eegEvent";
 }
 
 
 void MainWindow::on_fftEvent( double packet[125] ) {
 
+    Q_UNUSED(packet);
     qDebug() << "on_fftEvent";
 }
 
 
 void MainWindow::ToggleMouse() {
 
-    eyes.mouse = (eyes.mouse == EyeXHost::Mouse::Off)
-            ? EyeXHost::Mouse::Control
-            : EyeXHost::Mouse::Off;
+    eyes.mouse = (eyes.mouse == EyeXHost::Mouse::Control)
+            ? EyeXHost::Mouse::Gaze
+            : EyeXHost::Mouse::Control;
 
-    if (eyes.mouse == EyeXHost::Mouse::Off) {
-    } else {
+    if (eyes.mouse == EyeXHost::Mouse::Control) {
+    }
+
+    UpdateActivatableRegions();
+}
+
+
+void MainWindow::ToggleGaze() {
+
+    eyes.mouse = (eyes.mouse == EyeXHost::Mouse::Gaze)
+            ? EyeXHost::Mouse::Off
+            : EyeXHost::Mouse::Gaze;
+
+    if (eyes.mouse == EyeXHost::Mouse::Gaze) {
     }
 
     UpdateActivatableRegions();

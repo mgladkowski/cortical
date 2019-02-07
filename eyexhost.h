@@ -54,7 +54,7 @@ public:
     int     emaX;
     int     emaY;
     int     ema_size;
-    float   ema_multiplier;
+    double  ema_multiplier;
 
     bool    userPresent;
 

@@ -2,10 +2,8 @@
 #define HEATMAP_H
 
 #include <QBasicTimer>
-#include <QDebug>
 #include <QLinearGradient>
 #include <QPainter>
-#include <QPen>
 #include <QTimerEvent>
 #include <QWidget>
 #include "helpers.h"
@@ -31,7 +29,7 @@ private:
 
     QBasicTimer  timer;
     HeatGradient gradient;
-    double       data[125][400];
+    double       data[125][200];
 
 
 public slots:

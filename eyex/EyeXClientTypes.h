@@ -35,7 +35,7 @@ typedef int TX_THREADID;
 
 /*********************************************************************************************************************/
 
-#define TX_EMPTY_HANDLE 0
+#define TX_EMPTY_HANDLE nullptr
 #define TX_INVALID_TICKET 0
 
 #define TX_TRUE 1
