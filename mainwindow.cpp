@@ -883,6 +883,9 @@ void MainWindow::ToggleMouse() {
             : EyeXHost::Mouse::Control;
 
     if (eyes.mouse == EyeXHost::Mouse::Control) {
+        gazepoint->hide();
+    } else {
+        gazepoint->show();
     }
 
     UpdateActivatableRegions();
@@ -896,6 +899,9 @@ void MainWindow::ToggleGaze() {
             : EyeXHost::Mouse::Gaze;
 
     if (eyes.mouse == EyeXHost::Mouse::Gaze) {
+        gazepoint->show();
+    } else {
+        gazepoint->hide();
     }
 
     UpdateActivatableRegions();
@@ -908,9 +914,7 @@ void MainWindow::ToggleBrain() {
             ? BciHost::Mouse::Control
             : BciHost::Mouse::Off;
 
-    if (brain.mouse == BciHost::Mouse::Off) {
-
-    } else {
+    if (brain.mouse == BciHost::Mouse::Control) {
 
     }
 }
