@@ -126,20 +126,15 @@ void MainWindow::InitializeUi() {
 
     // gazepoint
 
-    gazepoint = new GazePoint();
+    gazepoint = new GazePoint(ui->frameScreen);
     gazepoint->resize(gazepoint->sizeHint());
     gazepoint->move(1,1);
 
     // BCI heatmap
 
-    heatmap = new HeatMap();
+    heatmap = new HeatMap(ui->frameScreen);
     heatmap->resize(heatmap->sizeHint());
     heatmap->move(HEATMAP_INITIAL_X,HEATMAP_INITIAL_Y);
-
-    QLayout *layout = this->layout();
-    layout->addWidget(gazepoint);
-    layout->addWidget(heatmap);
-    setLayout(layout);
 
     // done
 
@@ -915,7 +910,11 @@ void MainWindow::ToggleBrain() {
             : BciHost::Mouse::Off;
 
     if (brain.mouse == BciHost::Mouse::Control) {
-
+        heatmap->show();
+    } else if (brain.mouse == BciHost::Mouse::Gaze) {
+        heatmap->show();
+    } else {
+        heatmap->hide();
     }
 }
 
