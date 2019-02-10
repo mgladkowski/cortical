@@ -17,7 +17,11 @@
    <bool>false</bool>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Cortical</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>dev/chip.ico</normaloff>dev/chip.ico</iconset>
   </property>
   <property name="autoFillBackground">
    <bool>false</bool>

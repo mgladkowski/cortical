@@ -4,11 +4,11 @@
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
 
-
     // frameless always on top
 
     Qt::WindowFlags flags = this->windowFlags();
     setWindowFlags(flags | Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
+    setWindowTitle("CorticalEye");
     setParent(nullptr);
     setAttribute(Qt::WA_NoSystemBackground, true);
     setAttribute(Qt::WA_TranslucentBackground, true);
