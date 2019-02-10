@@ -27,7 +27,7 @@
 
 #define MENU_START              0
 #define MENU_SPACE              260
-#define HEATMAP_INITIAL_X       1700
+#define HEATMAP_INITIAL_X       1600
 #define HEATMAP_INITIAL_Y       900
 
 namespace Ui {

@@ -29,7 +29,7 @@ private:
 
     QBasicTimer  timer;
     HeatGradient gradient;
-    double       data[125][200];
+    double       data[125][300];
 
 
 public slots:

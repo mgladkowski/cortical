@@ -16,7 +16,7 @@ QSize HeatMap::minimumSizeHint() const {
 
 QSize HeatMap::sizeHint() const {
 
-    return QSize(200, 100);
+    return QSize(300, 100);
 }
 
 
@@ -28,9 +28,9 @@ void HeatMap::paintEvent(QPaintEvent *) {
 
     double   bp[10] = {3, 5, 7, 10, 15, 20, 30, 40, 60, 100};
 
-    for (int t=0; t < 200; t++) {
+    for (int t=0; t < 300; t++) {
 
-        for (int f=0; f < 60; f++) {
+        for (int f=0; f < 50; f++) {
 
             point[0] = QPoint(t*2,f*2);
 
@@ -90,7 +90,7 @@ void HeatMap::fftEvent(double packet[125]){
 
     for (int f=0; f < 125; f++) {
 
-        std::rotate(data[f], data[f]+199, data[f]+200);
+        std::rotate(data[f], data[f]+299, data[f]+300);
         data[f][0] = packet[f];
     }
 }
