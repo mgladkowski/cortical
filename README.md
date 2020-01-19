@@ -15,4 +15,4 @@ Eye gaze interactors overlay on screen, providing menus and commands.  The softw
 
 ### Ongoing development : 
 
-This is still an alpha prototype and some configuration is still hardcoded while I experiment, learn QT Framework, and get features functional.  This will receive more polish, perhaps even a rewrite.  Machine learning for EEG triggered mouse-clicks is coming, making the computer potentially fully hands free.
+This is still an alpha prototype and some configuration is still hardcoded while I experiment, learn QT Framework, and get features functional.  This will receive more polish, perhaps even a rewrite.  Want to introduce machine learning to trigger mouse-click intent from motor cortex EEG data.
